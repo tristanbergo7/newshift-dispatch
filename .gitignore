@@ -43,3 +43,4 @@ next-env.d.ts
 
 # signed-up companies (local demo data)
 /data/
+!.env.example
