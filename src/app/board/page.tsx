@@ -296,6 +296,27 @@ function JobCard({ job, tech, fresh }: { job: Job; tech?: Tech; fresh: boolean }
             </div>
           )}
 
+          {d && (d.parts_to_bring?.length > 0 || d.first_checks?.length > 0) && (
+            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs">
+              {d.parts_to_bring?.length > 0 && (
+                <span className="flex flex-wrap items-center gap-1.5">
+                  <span className="text-slate-400">🧰 Bring:</span>
+                  {d.parts_to_bring.map((p) => (
+                    <span key={p} className="rounded bg-violet-400/15 px-1.5 py-0.5 text-violet-200">
+                      {p}
+                    </span>
+                  ))}
+                </span>
+              )}
+              {d.first_checks?.length > 0 && (
+                <span className="text-slate-400">
+                  🔍 Check first: <span className="text-slate-300">{d.first_checks.join(" · ")}</span>
+                </span>
+              )}
+              {d.est_minutes > 0 && <span className="text-slate-400">⏱ ~{d.est_minutes} min</span>}
+            </div>
+          )}
+
           <div className="mt-3 grid gap-3 md:grid-cols-2">
             <div className="rounded-xl bg-[var(--navy-800)] p-3">
               <div className="text-[11px] uppercase tracking-wider text-slate-400">

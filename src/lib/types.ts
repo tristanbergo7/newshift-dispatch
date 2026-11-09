@@ -8,6 +8,9 @@ export interface Diagnosis {
   urgency: Urgency;
   confidence: number; // 0..1
   summary: string;
+  parts_to_bring: string[]; // likely replacement parts, so the tech can fix it on the first visit
+  first_checks: string[]; // what the tech should test first on arrival
+  est_minutes: number; // rough on-site repair time
   source: "ai" | "fallback";
 }
 

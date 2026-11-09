@@ -40,6 +40,9 @@ const DiagnosisSchema = z.object({
   urgency: z.enum(["low", "medium", "high", "emergency"]),
   confidence: z.number(),
   summary: z.string(),
+  parts_to_bring: z.array(z.string()),
+  first_checks: z.array(z.string()),
+  est_minutes: z.number(),
 });
 
 const DIAG_SYSTEM = `You are a senior appliance repair diagnostician working for an independent repair shop in San Diego.
@@ -51,8 +54,11 @@ Rules:
 - appliance_type: one lowercase word or two, e.g. "refrigerator", "washer", "dryer", "dishwasher", "range", "oven", "freezer", "microwave".
 - likely_issue: the most probable failing component or system, specific and short, max 5 words, no parentheses (e.g. "defrost system issue", "failed drain pump"). It is inserted into a customer SMS as "likely <issue>".
 - urgency: emergency = gas smell, sparks, active flooding; high = food spoilage risk or no heat/cooling; medium = degraded but usable; low = cosmetic/noise.
-- confidence: 0 to 1, your honest probability that likely_issue is right.
-- summary: one friendly sentence for the customer explaining what is probably wrong, max 25 words.`;
+- confidence: 0 to 1, your honest probability that likely_issue is right. Classic symptom patterns (e.g. fridge warm but freezer cold, washer won't drain with an OE code, dryer tumbles but no heat) justify 0.65–0.85; vague notes like "broken" stay low.
+- summary: one friendly sentence for the customer explaining what is probably wrong, max 25 words.
+- parts_to_bring: 1–3 specific replacement parts the tech should load on the truck so the job is fixed on the first visit (e.g. "defrost heater", "defrost thermostat", "evaporator fan motor"). Use the brand and model when known.
+- first_checks: 2–3 short checks the tech should do first on arrival, max 8 words each.
+- est_minutes: realistic on-site repair time in minutes if the likely issue is right.`;
 
 export async function diagnose(input: {
   note: string;
@@ -103,6 +109,9 @@ export async function diagnose(input: {
       likely_issue: clean(out.likely_issue),
       summary: clean(out.summary),
       model: out.model ? clean(out.model) || null : null,
+      parts_to_bring: out.parts_to_bring.map(clean).filter(Boolean).slice(0, 3),
+      first_checks: out.first_checks.map(clean).filter(Boolean).slice(0, 3),
+      est_minutes: Math.max(15, Math.min(480, Math.round(out.est_minutes || 60))),
       confidence: Math.max(0, Math.min(1, out.confidence)),
       source: "ai",
     };
@@ -114,12 +123,13 @@ function fallbackDiagnosis(note: string): Diagnosis {
   const n = note.toLowerCase();
   const brands = ["Samsung", "LG", "Whirlpool", "GE", "Sub-Zero", "Maytag", "KitchenAid", "Bosch", "Frigidaire", "Wolf", "Viking"];
   const brand = brands.find((b) => n.includes(b.toLowerCase())) ?? "Unknown";
-  const types: [RegExp, string, string][] = [
-    [/fridge|refrigerator|freezer|cool|cold|ice/, "refrigerator", "cooling system fault (fan, defrost or sealed system)"],
-    [/washer|washing|spin|drain/, "washer", "drain pump or drive system fault"],
-    [/dryer|dry|heat/, "dryer", "heating element or thermal fuse failure"],
-    [/dishwasher|dishes/, "dishwasher", "drain or wash pump fault"],
-    [/oven|range|stove|burner/, "range", "igniter or heating element failure"],
+  // [match, type, likely issue, parts to bring]; dishwasher must come before washer.
+  const types: [RegExp, string, string, string[]][] = [
+    [/fridge|refrigerator|freezer|cool|cold|ice/, "refrigerator", "cooling system fault", ["evaporator fan motor", "defrost heater", "defrost thermostat"]],
+    [/dishwasher|dishes/, "dishwasher", "drain or wash pump fault", ["drain pump", "wash pump"]],
+    [/washer|washing|spin|drain/, "washer", "drain pump or drive fault", ["drain pump", "lid switch"]],
+    [/dryer|dry|heat/, "dryer", "heating element or thermal fuse failure", ["heating element", "thermal fuse"]],
+    [/oven|range|stove|burner/, "range", "igniter or heating element failure", ["oven igniter", "bake element"]],
   ];
   const hit = types.find(([re]) => re.test(n));
   return {
@@ -130,6 +140,9 @@ function fallbackDiagnosis(note: string): Diagnosis {
     urgency: hit?.[1] === "refrigerator" ? "high" : "medium",
     confidence: 0.4,
     summary: "Based on your description, a technician will confirm the exact fault on site.",
+    parts_to_bring: hit?.[3] ?? [],
+    first_checks: ["Confirm the symptom with the customer", "Check power and error codes"],
+    est_minutes: 60,
     source: "fallback",
   };
 }

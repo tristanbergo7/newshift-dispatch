@@ -207,6 +207,9 @@ export default function UploadPage() {
             {live?.assignment ? (
               <div className="space-y-3 rounded-2xl bg-emerald-500/10 p-5">
                 <Step done label={`Booked: ${live.assignment.tech_name.split(" ")[0]}, ${live.assignment.window}`} />
+                {result.parts_to_bring?.length > 0 && (
+                  <Step done label={`Bringing likely parts (${result.parts_to_bring.join(", ")}) to fix it in one visit`} />
+                )}
                 <Step
                   done={!!live.sms}
                   label={live.sms ? (live.sms.status === "sent" ? "Confirmation text sent to your phone" : "Confirmation on its way") : "Texting you a confirmation…"}
