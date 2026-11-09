@@ -1,6 +1,11 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+interface JobStatus {
+  assignment: { tech_name: string; window: string } | null;
+  sms: { status: string } | null;
+}
 import type { Diagnosis } from "@/lib/types";
 
 // Downscale on the phone so uploads over the tunnel are fast (~150–300 KB).
@@ -31,6 +36,19 @@ const URGENCY_STYLE: Record<string, string> = {
   emergency: "bg-red-500/20 text-red-300",
 };
 
+function Step({ done, label }: { done?: boolean; label: string }) {
+  return (
+    <div className="flex items-center gap-3">
+      {done ? (
+        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-emerald-400 text-sm font-bold text-[var(--navy-950)]">✓</span>
+      ) : (
+        <span className="h-7 w-7 shrink-0 animate-spin rounded-full border-2 border-sky-400 border-t-transparent" />
+      )}
+      <span className={done ? "font-semibold text-white" : "text-slate-300"}>{label}</span>
+    </div>
+  );
+}
+
 export default function UploadPage() {
   const [photo, setPhoto] = useState<string | null>(null);
   const [note, setNote] = useState("");
@@ -40,6 +58,29 @@ export default function UploadPage() {
   const [state, setState] = useState<"form" | "loading" | "done">("form");
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<Diagnosis | null>(null);
+  const [jobId, setJobId] = useState<string | null>(null);
+  const [live, setLive] = useState<JobStatus | null>(null);
+
+  // Follow the job until the tech is assigned and the SMS has gone out.
+  useEffect(() => {
+    if (!jobId) return;
+    let stop = false;
+    const tick = async () => {
+      try {
+        const r = await fetch(`/api/jobs/${jobId}`, { cache: "no-store" });
+        if (r.ok) {
+          const d: JobStatus = await r.json();
+          if (!stop) setLive(d);
+          if (d.sms) return; // done
+        }
+      } catch {}
+      if (!stop) setTimeout(tick, 1500);
+    };
+    tick();
+    return () => {
+      stop = true;
+    };
+  }, [jobId]);
   const cameraRef = useRef<HTMLInputElement>(null);
   const libraryRef = useRef<HTMLInputElement>(null);
 
@@ -70,6 +111,7 @@ export default function UploadPage() {
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();
       setResult(data.diagnosis);
+      setJobId(data.id);
       setState("done");
     } catch {
       setError("Something went wrong. Please try again.");
@@ -110,10 +152,20 @@ export default function UploadPage() {
                 <span className="rounded-full bg-white/10 px-3 py-1">{Math.round(result.confidence * 100)}% confident</span>
               </div>
             </div>
-            <div className="rounded-2xl bg-emerald-500/10 p-5 text-center text-emerald-200">
-              <div className="text-3xl">✓</div>
-              <div className="mt-1 text-lg font-semibold">Request received</div>
-              <div className="text-sm">A technician will text you shortly.</div>
+            <div className="space-y-3 rounded-2xl bg-[var(--navy-800)] p-5">
+              <Step done label="Diagnosis complete" />
+              <Step
+                done={!!live?.assignment}
+                label={
+                  live?.assignment
+                    ? `${live.assignment.tech_name.split(" ")[0]} will arrive ${live.assignment.window}`
+                    : "Finding the best technician…"
+                }
+              />
+              <Step
+                done={!!live?.sms}
+                label={live?.sms ? (live.sms.status === "sent" ? "Confirmation text sent to your phone" : "Confirmation on its way") : live?.assignment ? "Texting you…" : "A technician will text you shortly"}
+              />
             </div>
           </section>
         ) : (

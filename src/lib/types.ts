@@ -50,6 +50,7 @@ export interface Job {
   hasPhoto: boolean;
   status: JobStatus;
   diagnosis?: Diagnosis;
+  diagnosedMs?: number;
   assignment?: Assignment;
   sms?: SmsResult;
   rulesApplied?: string;

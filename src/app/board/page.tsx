@@ -273,6 +273,9 @@ function JobCard({ job, tech, fresh }: { job: Job; tech?: Tech; fresh: boolean }
             </div>
             {d && (
               <div className="flex shrink-0 gap-2 text-xs">
+                {job.diagnosedMs != null && d.source === "ai" && (
+                  <span className="rounded-full bg-sky-400/15 px-2.5 py-1 text-sky-200">⚡ {(job.diagnosedMs / 1000).toFixed(1)}s</span>
+                )}
                 <span className={`rounded-full px-2.5 py-1 capitalize ${URGENCY[d.urgency] ?? ""}`}>{d.urgency}</span>
                 <span className="rounded-full bg-white/10 px-2.5 py-1">{Math.round(d.confidence * 100)}%</span>
               </div>

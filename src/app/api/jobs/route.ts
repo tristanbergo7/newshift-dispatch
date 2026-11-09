@@ -49,8 +49,9 @@ export async function POST(req: Request) {
   if (photo) s.photos.set(job.id, { mediaType: photo.mediaType, data: Buffer.from(photo.base64, "base64") });
 
   // Diagnosis is awaited so the customer's phone shows it.
+  const t0 = Date.now();
   const diagnosis = await diagnose({ note: job.note, photo });
-  updateJob(job.id, { diagnosis, status: "dispatching" });
+  updateJob(job.id, { diagnosis, diagnosedMs: Date.now() - t0, status: "dispatching" });
 
   // Dispatch + SMS run after the response is sent.
   // Serialized so two simultaneous jobs can't book the same tech slot.
