@@ -98,6 +98,9 @@ export default function BoardPage() {
             <span className={`h-2.5 w-2.5 rounded-full ${online ? "animate-pulse bg-emerald-400" : "bg-red-400"}`} />
             {online ? "Live" : "Reconnecting"}
           </span>
+          <a href="/how" target="_blank" className="rounded-lg border border-white/15 px-3 py-1.5 text-slate-300 hover:text-white">
+            How it works
+          </a>
           <a href="/qr" target="_blank" className="rounded-lg border border-sky-400/40 px-3 py-1.5 text-sky-300 hover:text-white">
             Show QR
           </a>
