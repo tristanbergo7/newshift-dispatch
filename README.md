@@ -48,7 +48,7 @@ Samsung and LG can diagnose their own smart appliances and send their own techni
 - **Twilio** for SMS, with an on-screen preview fallback
 - **Auth:** scrypt-hashed passwords, signed httpOnly session cookies; each shop can only reach its own jobs, rules and customer photos
 - **Storage:** in memory, with shop sign-ups saved to a local JSON file (hackathon scope)
-- **Hosting:** runs on a laptop behind a Cloudflare Tunnel at dispatch.newshiftai.com
+- **Hosting:** Railway (single always-on Node service) at dispatch.newshiftai.com; DNS on Cloudflare
 
 ## Run it locally
 
