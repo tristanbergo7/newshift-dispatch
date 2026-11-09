@@ -2,6 +2,7 @@ import { dispatch, fallbackDispatch } from "./ai";
 import { sendSms } from "./sms";
 import { getJob, store, updateJob } from "./store";
 import type { Assignment, Job } from "./types";
+import { SMS_EN, fill } from "./i18n";
 
 const MAX_OPTIONS = 3;
 
@@ -59,7 +60,7 @@ export function bookJob(id: string, optionIndex: number): BookResult {
     return { ok: false, error: "That time was just taken. Please pick another.", status: 409 };
   }
   tech.windows = tech.windows.filter((w) => w !== choice.window);
-  updateJob(id, { assignment: choice, status: "assigned", callbackRequested: false });
+  updateJob(id, { assignment: choice, status: "assigned", callbackRequested: false, bookedAt: Date.now() });
   void sendConfirmation(id);
   return { ok: true };
 }
@@ -73,7 +74,15 @@ async function sendConfirmation(id: string) {
   const techFirst = a.tech_name.split(" ")[0];
   const brand = d.brand && d.brand !== "Unknown" ? `${d.brand} ` : "";
   const appliance = d.appliance_type === "refrigerator" ? "fridge" : d.appliance_type;
-  const body = `Hi ${first}, you're booked! ${techFirst} from NewShift will arrive ${a.window} for your ${brand}${appliance} (likely ${d.likely_issue}). Reply C to confirm.`;
+  const english = !d.language || d.language.startsWith("en");
+  const body = fill(d.sms_template || SMS_EN, {
+    name: first,
+    tech: techFirst,
+    window: a.window,
+    appliance: english ? `${brand}${appliance}` : `${brand}${d.appliance_type}`.trim(),
+    issue: english ? d.likely_issue : d.issue_for_customer,
+    price: d.est_price_low ? ` Est. $${d.est_price_low}–$${d.est_price_high}.` : "",
+  });
   const sms = job.customer.phone
     ? await sendSms(job.customer.phone, body)
     : { status: "preview" as const, to: "", body, error: "No phone number" };

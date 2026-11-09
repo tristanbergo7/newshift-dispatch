@@ -14,6 +14,7 @@ interface JobStatus {
   sms: { status: string } | null;
 }
 import type { Diagnosis } from "@/lib/types";
+import { UI_EN, fill, type UiKey } from "@/lib/i18n";
 
 // Downscale on the phone so uploads over the tunnel are fast (~150–300 KB).
 async function resizeImage(file: File, max = 1280): Promise<string> {
@@ -82,6 +83,9 @@ export default function UploadPage() {
   const [live, setLive] = useState<JobStatus | null>(null);
   const [booking, setBooking] = useState<number | null>(null);
   const [bookError, setBookError] = useState<string | null>(null);
+
+  // Customer-screen label in the customer's language (AI-translated), English fallback.
+  const t = (key: UiKey, vars: Record<string, string> = {}) => fill(result?.ui?.[key] || UI_EN[key], vars);
 
   async function refresh(id: string) {
     const r = await fetch(`/api/jobs/${id}`, { cache: "no-store" });
@@ -158,7 +162,7 @@ export default function UploadPage() {
       const res = await fetch("/api/jobs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ photo, note, name, phone, address, appliance, brand }),
+        body: JSON.stringify({ photo, note, name, phone, address, appliance, brand, lang: navigator.language }),
       });
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();
@@ -187,37 +191,53 @@ export default function UploadPage() {
 
         {state === "done" && result ? (
           <section className="space-y-4">
+            {result.urgency === "emergency" && result.safety_steps?.length > 0 && (
+              <div className="rounded-2xl border-2 border-red-400 bg-red-500/15 p-5">
+                <div className="flex items-center gap-2 text-lg font-bold text-red-200">⚠️ {t("safety_title")}</div>
+                <ol className="mt-2 list-decimal space-y-1 pl-5 text-red-50">
+                  {result.safety_steps.map((s) => (
+                    <li key={s}>{s}</li>
+                  ))}
+                </ol>
+              </div>
+            )}
             <div className="rounded-2xl border border-sky-400/30 bg-[var(--navy-800)] p-5">
-              <div className="text-xs uppercase tracking-wider text-sky-300">AI diagnosis</div>
+              <div className="text-xs uppercase tracking-wider text-sky-300">{t("diagnosis")}</div>
               <div className="mt-1 text-2xl font-bold">
                 {result.brand !== "Unknown" ? result.brand + " " : ""}
                 <span className="capitalize">{result.appliance_type}</span>
               </div>
               {result.model && <div className="text-sm text-slate-400">Model {result.model}</div>}
-              <div className="mt-4 text-sm text-slate-400">Likely issue</div>
-              <div className="text-lg font-semibold">{result.likely_issue}</div>
+              <div className="mt-4 text-sm text-slate-400">{t("likely_issue")}</div>
+              <div className="text-lg font-semibold">{result.issue_for_customer || result.likely_issue}</div>
               <p className="mt-3 text-slate-300">{result.summary}</p>
               <div className="mt-4 flex flex-wrap gap-2 text-sm">
                 <span className={`rounded-full px-3 py-1 capitalize ${URGENCY_STYLE[result.urgency] ?? ""}`}>
-                  {result.urgency} urgency
+                  {result.urgency} {t("urgency")}
                 </span>
-                <span className="rounded-full bg-white/10 px-3 py-1">{Math.round(result.confidence * 100)}% confident</span>
+                <span className="rounded-full bg-white/10 px-3 py-1">
+                  {Math.round(result.confidence * 100)}% {t("confident")}
+                </span>
               </div>
+              {result.est_price_low > 0 && (
+                <div className="mt-4 rounded-xl bg-white/5 p-3">
+                  <div className="text-sm text-slate-400">{t("estimate")}</div>
+                  <div className="text-2xl font-bold text-emerald-300">
+                    ${result.est_price_low}–${result.est_price_high}
+                  </div>
+                  <div className="text-xs text-slate-400">{t("estimate_note")}</div>
+                </div>
+              )}
             </div>
             {live?.assignment ? (
               <div className="space-y-3 rounded-2xl bg-emerald-500/10 p-5">
-                <Step done label={`Booked: ${live.assignment.tech_name.split(" ")[0]}, ${live.assignment.window}`} />
-                {result.parts_to_bring?.length > 0 && (
-                  <Step done label={`Bringing likely parts (${result.parts_to_bring.join(", ")}) to fix it in one visit`} />
-                )}
-                <Step
-                  done={!!live.sms}
-                  label={live.sms ? (live.sms.status === "sent" ? "Confirmation text sent to your phone" : "Confirmation on its way") : "Texting you a confirmation…"}
-                />
+                <Step done label={t("booked", { tech: live.assignment.tech_name.split(" ")[0], window: live.assignment.window })} />
+                {result.parts_to_bring?.length > 0 && <Step done label={t("bringing_parts", { parts: result.parts_to_bring.join(", ") })} />}
+                <Step done={!!live.sms} label={live.sms ? t("text_sent") : t("text_pending")} />
               </div>
             ) : live?.status === "awaiting_customer" && live.options?.length ? (
               <div className="rounded-2xl bg-[var(--navy-800)] p-5">
-                <div className="text-lg font-semibold">Pick a time for your repair</div>
+                <div className="text-lg font-semibold">{t("pick_time")}</div>
                 <div className="mt-3 space-y-2">
                   {live.options.map((o, i) => (
                     <button
@@ -230,12 +250,12 @@ export default function UploadPage() {
                     >
                       <span>
                         <span className="block text-base font-semibold">{o.window}</span>
-                        <span className="text-sm text-slate-400">with {o.tech_name.split(" ")[0]}</span>
+                        <span className="text-sm text-slate-400">{t("with_tech", { tech: o.tech_name.split(" ")[0] })}</span>
                       </span>
                       {booking === i ? (
                         <span className="h-5 w-5 animate-spin rounded-full border-2 border-sky-300 border-t-transparent" />
                       ) : i === 0 ? (
-                        <span className="rounded-full bg-sky-400 px-2.5 py-1 text-xs font-bold text-[var(--navy-950)]">Recommended</span>
+                        <span className="rounded-full bg-sky-400 px-2.5 py-1 text-xs font-bold text-[var(--navy-950)]">{t("recommended")}</span>
                       ) : null}
                     </button>
                   ))}
@@ -243,17 +263,17 @@ export default function UploadPage() {
                 {bookError && <div className="mt-3 rounded-lg bg-red-500/15 px-3 py-2 text-sm text-red-200">{bookError}</div>}
                 <div className="mt-4 border-t border-white/10 pt-4 text-center">
                   {live.callbackRequested ? (
-                    <div className="text-sm text-emerald-300">✓ Got it. A team member will call you shortly.</div>
+                    <div className="text-sm text-emerald-300">✓ {t("call_requested")}</div>
                   ) : (
                     <button onClick={askForCall} className="text-sm text-slate-300 underline">
-                      Rather talk to a person? Request a call
+                      {t("request_call")}
                     </button>
                   )}
                 </div>
               </div>
             ) : (
               <div className="rounded-2xl bg-[var(--navy-800)] p-5">
-                <Step label={live?.status === "error" ? "We'll call you to schedule." : "Finding the best technician and times…"} done={live?.status === "error"} />
+                <Step label={live?.status === "error" ? t("call_requested") : t("finding_tech")} done={live?.status === "error"} />
               </div>
             )}
           </section>
@@ -323,7 +343,7 @@ export default function UploadPage() {
             <textarea
               className={input}
               rows={2}
-              placeholder="What's wrong? e.g. not cooling, won't drain, no heat"
+              placeholder="What's wrong? Any language works 🌎 e.g. not cooling, won't drain"
               value={note}
               onChange={(e) => setNote(e.target.value)}
             />

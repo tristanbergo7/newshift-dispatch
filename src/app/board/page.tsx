@@ -64,8 +64,16 @@ export default function BoardPage() {
     setJobs([]);
   }
 
-  const assigned = jobs.filter((j) => j.status === "assigned").length;
+  const booked = jobs.filter((j) => j.status === "assigned" && j.bookedAt);
+  const avgBookSec = booked.length
+    ? Math.round(booked.reduce((s, j) => s + (j.bookedAt! - j.createdAt), 0) / booked.length / 1000)
+    : null;
+  const calls = jobs.filter((j) => j.callbackRequested).length;
+  const partsReady = jobs.filter((j) => j.diagnosis?.parts_to_bring?.length).length;
   const techById = Object.fromEntries(techs.map((t) => [t.id, t]));
+  // Unbooked emergencies jump to the top.
+  const isUrgent = (j: Job) => j.diagnosis?.urgency === "emergency" && j.status !== "assigned";
+  const ordered = [...jobs].sort((a, b) => Number(isUrgent(b)) - Number(isUrgent(a)) || b.createdAt - a.createdAt);
 
   return (
     <main className="min-h-screen bg-[var(--navy-950)]">
@@ -79,7 +87,13 @@ export default function BoardPage() {
         </div>
         <div className="flex items-center gap-6 text-sm">
           <Stat label="Jobs today" value={jobs.length} />
-          <Stat label="Dispatched" value={assigned} />
+          <Stat label="Booked by customer" value={booked.length} />
+          <Stat
+            label="Photo → booked"
+            value={avgBookSec == null ? "—" : avgBookSec < 60 ? `${avgBookSec}s` : `${Math.floor(avgBookSec / 60)}m ${avgBookSec % 60}s`}
+          />
+          <Stat label="Phone calls needed" value={calls} />
+          <Stat label="Parts list ready" value={jobs.length ? `${partsReady}/${jobs.length}` : "—"} />
           <span className={`flex items-center gap-2 ${online ? "text-emerald-300" : "text-red-300"}`}>
             <span className={`h-2.5 w-2.5 rounded-full ${online ? "animate-pulse bg-emerald-400" : "bg-red-400"}`} />
             {online ? "Live" : "Reconnecting"}
@@ -108,7 +122,7 @@ export default function BoardPage() {
               </div>
             </div>
           )}
-          {jobs.map((j) => (
+          {ordered.map((j) => (
             <JobCard key={j.id} job={j} tech={techById[(j.assignment ?? j.options?.[0])?.tech_id ?? ""]} fresh={fresh.has(j.id)} />
           ))}
         </section>
@@ -227,7 +241,7 @@ function RulesPanel({ rules, onSaved }: { rules: string; onSaved: (r: string) =>
   );
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+function Stat({ label, value }: { label: string; value: number | string }) {
   return (
     <div className="text-right">
       <div className="text-lg font-bold leading-none">{value}</div>
@@ -240,7 +254,17 @@ function JobCard({ job, tech, fresh }: { job: Job; tech?: Tech; fresh: boolean }
   const d = job.diagnosis;
   const a = job.assignment;
   return (
-    <article className={`rounded-2xl border border-white/10 bg-[var(--navy-900)] p-4 ${fresh ? "flash-in" : ""}`}>
+    <article
+      className={`rounded-2xl border bg-[var(--navy-900)] p-4 ${fresh ? "flash-in" : ""} ${
+        d?.urgency === "emergency" ? "border-red-400 shadow-lg shadow-red-500/20" : "border-white/10"
+      }`}
+    >
+      {d?.urgency === "emergency" && (
+        <div className="mb-3 rounded-lg bg-red-500/20 px-3 py-2 text-sm font-semibold text-red-100">
+          ⚠️ EMERGENCY: safety steps shown to the customer. Call them now
+          {job.customer.phone ? `: ${job.customer.phone}` : ""}.
+        </div>
+      )}
       <div className="flex gap-4">
         <div className="h-28 w-28 shrink-0 overflow-hidden rounded-xl bg-[var(--navy-800)]">
           {job.hasPhoto ? (
@@ -281,8 +305,16 @@ function JobCard({ job, tech, fresh }: { job: Job; tech?: Tech; fresh: boolean }
                 {job.diagnosedMs != null && d.source === "ai" && (
                   <span className="rounded-full bg-sky-400/15 px-2.5 py-1 text-sky-200">⚡ {(job.diagnosedMs / 1000).toFixed(1)}s</span>
                 )}
+                {d.language && !d.language.startsWith("en") && (
+                  <span className="rounded-full bg-fuchsia-400/15 px-2.5 py-1 text-fuchsia-200">🌎 {d.language_name || d.language}</span>
+                )}
                 <span className={`rounded-full px-2.5 py-1 capitalize ${URGENCY[d.urgency] ?? ""}`}>{d.urgency}</span>
                 <span className="rounded-full bg-white/10 px-2.5 py-1">{Math.round(d.confidence * 100)}%</span>
+                {d.est_price_low > 0 && (
+                  <span className="rounded-full bg-emerald-400/15 px-2.5 py-1 text-emerald-200">
+                    ${d.est_price_low}–${d.est_price_high}
+                  </span>
+                )}
               </div>
             )}
           </div>

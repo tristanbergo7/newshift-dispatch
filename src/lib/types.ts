@@ -11,6 +11,14 @@ export interface Diagnosis {
   parts_to_bring: string[]; // likely replacement parts, so the tech can fix it on the first visit
   first_checks: string[]; // what the tech should test first on arrival
   est_minutes: number; // rough on-site repair time
+  est_price_low: number; // USD, total to customer incl. service call, labor, parts
+  est_price_high: number;
+  safety_steps: string[]; // only for emergencies, in the customer's language
+  language: string; // customer's language, ISO 639-1 (en, es, ko, vi, zh, tl, ...)
+  language_name: string; // e.g. "Español", shown on the board
+  issue_for_customer: string; // likely_issue in the customer's language (used in SMS + phone)
+  ui: Record<string, string>; // customer-screen labels in their language
+  sms_template: string; // confirmation SMS in their language with {name} {tech} {window} {appliance} {issue} {price}
   source: "ai" | "fallback";
 }
 
@@ -59,6 +67,8 @@ export interface Job {
   assignment?: Assignment;
   options?: Assignment[]; // time slots offered to the customer; options[0] = AI recommendation
   callbackRequested?: boolean;
+  bookedAt?: number;
+  langHint?: string; // phone's browser language
   sms?: SmsResult;
   rulesApplied?: string;
 }
