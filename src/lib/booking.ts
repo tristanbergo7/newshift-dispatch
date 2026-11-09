@@ -1,7 +1,7 @@
 import { dispatch, fallbackDispatch } from "./ai";
 import { sendSms } from "./sms";
-import { getJob, store, updateJob } from "./store";
-import type { Assignment, Job } from "./types";
+import { getCompany, getJob, updateJob } from "./store";
+import type { Assignment, Company, Job } from "./types";
 import { SMS_EN, fill } from "./i18n";
 
 const MAX_OPTIONS = 3;
@@ -9,13 +9,13 @@ const MAX_OPTIONS = 3;
 // AI picks the best tech; we turn that into up to 3 time slots for the customer.
 export async function runDispatch(id: string) {
   const job = getJob(id);
-  if (!job) return;
-  const s = store();
+  const company = getCompany(job?.company);
+  if (!job || !company) return;
   try {
-    const rules = s.rules;
-    const best = await dispatch(job, s.techs, rules);
+    const rules = company.rules;
+    const best = await dispatch(job, company.techs, rules);
     updateJob(id, {
-      options: buildOptions(job, best, rules),
+      options: buildOptions(job, company, best, rules),
       status: "awaiting_customer",
       rulesApplied: rules || undefined,
     });
@@ -25,8 +25,8 @@ export async function runDispatch(id: string) {
   }
 }
 
-function buildOptions(job: Job, best: Assignment, rules: string): Assignment[] {
-  const techs = store().techs;
+function buildOptions(job: Job, company: Company, best: Assignment, rules: string): Assignment[] {
+  const techs = company.techs;
   const opts: Assignment[] = [best];
   const bestTech = techs.find((t) => t.id === best.tech_id);
   for (const w of bestTech?.windows ?? []) {
@@ -49,23 +49,24 @@ export type BookResult = { ok: true } | { ok: false; error: string; status: numb
 
 export function bookJob(id: string, optionIndex: number): BookResult {
   const job = getJob(id);
-  if (!job) return { ok: false, error: "Job not found", status: 404 };
+  const company = getCompany(job?.company);
+  if (!job || !company) return { ok: false, error: "Job not found", status: 404 };
   if (job.status === "assigned") return { ok: true }; // double tap
   const choice = job.options?.[optionIndex];
   if (!choice) return { ok: false, error: "Invalid option", status: 400 };
 
   // Synchronous check-and-book, so two customers can't take the same slot.
-  const tech = store().techs.find((t) => t.id === choice.tech_id);
+  const tech = company.techs.find((t) => t.id === choice.tech_id);
   if (!tech || !tech.windows.includes(choice.window)) {
     return { ok: false, error: "That time was just taken. Please pick another.", status: 409 };
   }
   tech.windows = tech.windows.filter((w) => w !== choice.window);
   updateJob(id, { assignment: choice, status: "assigned", callbackRequested: false, bookedAt: Date.now() });
-  void sendConfirmation(id);
+  void sendConfirmation(id, company.name);
   return { ok: true };
 }
 
-async function sendConfirmation(id: string) {
+async function sendConfirmation(id: string, companyName: string) {
   const job = getJob(id);
   if (!job?.assignment || !job.diagnosis) return;
   const a = job.assignment;
@@ -78,6 +79,7 @@ async function sendConfirmation(id: string) {
   const body = fill(d.sms_template || SMS_EN, {
     name: first,
     tech: techFirst,
+    company: companyName,
     window: a.window,
     appliance: english ? `${brand}${appliance}` : `${brand}${d.appliance_type}`.trim(),
     issue: english ? d.likely_issue : d.issue_for_customer,

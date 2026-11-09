@@ -82,6 +82,9 @@ export default async function HowPage() {
               <a href="/board" className="rounded-xl border border-white/15 px-5 py-3 font-semibold text-white">
                 See the dispatch board
               </a>
+              <a href="/setup" className="rounded-xl border border-emerald-400/50 px-5 py-3 font-semibold text-emerald-300">
+                Set up your shop →
+              </a>
             </div>
           </div>
           <div className="mx-auto text-center">

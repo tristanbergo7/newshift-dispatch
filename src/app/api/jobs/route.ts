@@ -2,17 +2,22 @@ import { NextResponse, after } from "next/server";
 import { randomUUID } from "crypto";
 import { diagnose } from "@/lib/ai";
 import { runDispatch } from "@/lib/booking";
-import { store, updateJob } from "@/lib/store";
+import { getCompany, store, updateJob } from "@/lib/store";
 import type { Job } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
-  const s = store();
+// GET /api/jobs?c=<company slug>  (defaults to the demo company)
+export async function GET(req: Request) {
+  const company = getCompany(new URL(req.url).searchParams.get("c"));
+  if (!company) return NextResponse.json({ error: "Company not found" }, { status: 404 });
   return NextResponse.json({
-    jobs: [...s.jobs].sort((a, b) => b.createdAt - a.createdAt),
-    techs: s.techs,
-    rules: s.rules,
+    company: { slug: company.slug, name: company.name },
+    jobs: store()
+      .jobs.filter((j) => j.company === company.slug)
+      .sort((a, b) => b.createdAt - a.createdAt),
+    techs: company.techs,
+    rules: company.rules,
   });
 }
 
@@ -24,17 +29,30 @@ function parseDataUrl(dataUrl: string | undefined) {
 }
 
 export async function POST(req: Request) {
-  let body: { photo?: string; note?: string; name?: string; phone?: string; address?: string; appliance?: string; brand?: string; lang?: string };
+  let body: {
+    company?: string;
+    photo?: string;
+    note?: string;
+    name?: string;
+    phone?: string;
+    address?: string;
+    appliance?: string;
+    brand?: string;
+    lang?: string;
+  };
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
+  const company = getCompany(body.company);
+  if (!company) return NextResponse.json({ error: "Company not found" }, { status: 404 });
 
   const photo = parseDataUrl(body.photo);
   const s = store();
   const job: Job = {
     id: randomUUID().slice(0, 8),
+    company: company.slug,
     createdAt: Date.now(),
     customer: {
       name: (body.name ?? "").trim() || "Customer",
@@ -53,7 +71,7 @@ export async function POST(req: Request) {
 
   // Diagnosis is awaited so the customer's phone shows it.
   const t0 = Date.now();
-  const diagnosis = await diagnose({ note: job.note, photo, appliance: job.applianceHint, brand: job.brandHint, lang: job.langHint });
+  const diagnosis = await diagnose({ note: job.note, photo, appliance: job.applianceHint, brand: job.brandHint, lang: job.langHint, pricing: company.pricing });
   updateJob(job.id, { diagnosis, diagnosedMs: Date.now() - t0, status: "dispatching" });
 
   // Dispatch runs after the response; serialized so concurrent jobs see consistent availability.

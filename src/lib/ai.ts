@@ -57,7 +57,7 @@ const DiagnosisSchema = z.object({
 // Shop pricing the estimate is based on (would be per-shop settings in production).
 export const SHOP_PRICING = { serviceCall: 89, laborPerHour: 140 };
 
-const DIAG_SYSTEM = `You are a senior appliance repair diagnostician working for an independent repair shop in San Diego.
+const DIAG_SYSTEM = `You are a senior appliance repair diagnostician working for an independent repair shop.
 You look at one customer photo (the appliance, a fault display, or the model/serial sticker) plus the customer's short note, and produce a field diagnosis a dispatcher can act on.
 
 Rules:
@@ -71,7 +71,7 @@ Rules:
 - parts_to_bring: 1–3 specific replacement parts the tech should load on the truck so the job is fixed on the first visit (e.g. "defrost heater", "defrost thermostat", "evaporator fan motor"). Use the brand and model when known.
 - first_checks: 2–3 short checks the tech should do first on arrival, max 8 words each.
 - est_minutes: realistic on-site repair time in minutes if the likely issue is right.
-- est_price_low / est_price_high: realistic total the customer would pay in USD for this repair, including the shop's $${SHOP_PRICING.serviceCall} service call, labor at $${SHOP_PRICING.laborPerHour}/hour for est_minutes, and typical retail price of the parts. Keep the range honest and reasonably tight (high is usually 1.3–1.8x low).
+- est_price_low / est_price_high: realistic total the customer would pay in USD for this repair, including the shop's service call fee, its hourly labor rate for est_minutes (both given in the message), and typical retail price of the parts. Keep the range honest and reasonably tight (high is usually 1.3–1.8x low).
 - urgency "emergency" ONLY for real safety risks: gas smell, burning smell, smoke, sparks, exposed wiring, or water actively flooding.
 - safety_steps: if urgency is "emergency", 2–3 short, plain instructions the customer should do RIGHT NOW (e.g. leave the house and call your gas company or 911 from outside; shut off the water valve; unplug only if safe or flip the breaker). Never include phone numbers other than 911. Otherwise an empty array.
 
@@ -91,7 +91,9 @@ export async function diagnose(input: {
   appliance?: string;
   brand?: string;
   lang?: string;
+  pricing?: { serviceCall: number; laborPerHour: number };
 }): Promise<Diagnosis> {
+  const pricing = input.pricing ?? SHOP_PRICING;
   const content: Anthropic.ContentBlockParam[] = [];
   if (input.photo) {
     content.push({
@@ -110,6 +112,7 @@ export async function diagnose(input: {
     lines.push("Use the customer's appliance/brand when the photo doesn't show it. If the photo clearly shows something different, trust the photo.");
   }
   if (input.lang) lines.push(`Phone language hint: ${input.lang}`);
+  lines.push(`Shop pricing: service call $${pricing.serviceCall}, labor $${pricing.laborPerHour}/hour.`);
   if (!input.photo) lines.push("(No photo was provided — diagnose from the text alone and lower confidence.)");
   content.push({ type: "text", text: lines.join("\n") });
 
@@ -139,7 +142,7 @@ export async function diagnose(input: {
       parts_to_bring: out.parts_to_bring.map(clean).filter(Boolean).slice(0, 3),
       first_checks: out.first_checks.map(clean).filter(Boolean).slice(0, 3),
       est_minutes: Math.max(15, Math.min(480, Math.round(out.est_minutes || 60))),
-      ...priceRange(out.est_price_low, out.est_price_high),
+      ...priceRange(out.est_price_low, out.est_price_high, pricing.serviceCall),
       safety_steps: out.urgency === "emergency" ? out.safety_steps.map(clean).filter(Boolean).slice(0, 3) : [],
       issue_for_customer: clean(out.issue_for_customer) || clean(out.likely_issue),
       language: (out.language || "en").toLowerCase().slice(0, 5),
@@ -170,9 +173,9 @@ function safeTemplate(t: string) {
 }
 
 // Round to $10 and keep the range sane even if the model returns odd numbers.
-function priceRange(low: number, high: number) {
+function priceRange(low: number, high: number, serviceCall: number) {
   const r = (n: number) => Math.round(n / 10) * 10;
-  const lo = Math.max(SHOP_PRICING.serviceCall, r(Math.min(low, high) || 0));
+  const lo = Math.max(serviceCall, r(Math.min(low, high) || 0));
   const hi = Math.max(lo + 40, r(Math.max(low, high) || 0));
   return { est_price_low: lo, est_price_high: hi };
 }
@@ -225,7 +228,7 @@ const DispatchSchema = z.object({
   reason: z.string(),
 });
 
-const DISPATCH_SYSTEM = `You are the dispatcher for an independent appliance repair shop in San Diego.
+const DISPATCH_SYSTEM = `You are the dispatcher for an independent appliance repair shop.
 Pick the single best technician and time window for a new job.
 
 Weigh, in order:

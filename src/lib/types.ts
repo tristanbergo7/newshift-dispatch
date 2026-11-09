@@ -31,7 +31,8 @@ export interface Tech {
   appliance_types: string[];
   zone: string;
   areas: string[]; // neighborhoods + zips covered
-  windows: string[]; // open windows today/tomorrow
+  windows: string[]; // open windows (booked ones are removed)
+  allWindows?: string[]; // original schedule, restored on reset
   color: string;
 }
 
@@ -51,10 +52,23 @@ export interface SmsResult {
   sid?: string;
 }
 
+export interface Company {
+  slug: string; // used in URLs: /c/<slug>/upload
+  name: string; // shown to customers and in the SMS
+  phone: string;
+  serviceArea: string;
+  pricing: { serviceCall: number; laborPerHour: number };
+  plan: "starter" | "pro";
+  techs: Tech[];
+  rules: string;
+  createdAt: number;
+}
+
 export type JobStatus = "diagnosing" | "dispatching" | "awaiting_customer" | "assigned" | "error";
 
 export interface Job {
   id: string;
+  company: string; // company slug
   createdAt: number;
   customer: { name: string; phone: string; address: string };
   note: string;

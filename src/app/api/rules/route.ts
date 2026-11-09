@@ -1,14 +1,19 @@
 import { NextResponse } from "next/server";
-import { store } from "@/lib/store";
+import { getCompany, saveCompanies } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
-  return NextResponse.json({ rules: store().rules });
+export async function GET(req: Request) {
+  const company = getCompany(new URL(req.url).searchParams.get("c"));
+  if (!company) return NextResponse.json({ error: "Company not found" }, { status: 404 });
+  return NextResponse.json({ rules: company.rules });
 }
 
 export async function POST(req: Request) {
+  const company = getCompany(new URL(req.url).searchParams.get("c"));
+  if (!company) return NextResponse.json({ error: "Company not found" }, { status: 404 });
   const { rules } = (await req.json().catch(() => ({}))) as { rules?: string };
-  store().rules = (rules ?? "").slice(0, 4000);
-  return NextResponse.json({ rules: store().rules });
+  company.rules = (rules ?? "").slice(0, 4000);
+  saveCompanies();
+  return NextResponse.json({ rules: company.rules });
 }

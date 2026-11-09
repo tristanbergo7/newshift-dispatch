@@ -22,7 +22,7 @@ export const UI_EN = {
 export type UiKey = keyof typeof UI_EN;
 
 export const SMS_EN =
-  "Hi {name}, you're booked! {tech} from NewShift will arrive {window} for your {appliance} (likely {issue}).{price} Reply C to confirm.";
+  "Hi {name}, you're booked! {tech} from {company} will arrive {window} for your {appliance} (likely {issue}).{price} Reply C to confirm.";
 
 export function fill(template: string, vars: Record<string, string>) {
   return template.replace(/\{(\w+)\}/g, (m, k) => (k in vars ? vars[k] : m));
