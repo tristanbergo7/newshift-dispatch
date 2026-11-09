@@ -57,6 +57,8 @@ Rules:
 export async function diagnose(input: {
   note: string;
   photo?: { mediaType: string; base64: string };
+  appliance?: string;
+  brand?: string;
 }): Promise<Diagnosis> {
   const content: Anthropic.ContentBlockParam[] = [];
   if (input.photo) {
@@ -69,10 +71,14 @@ export async function diagnose(input: {
       },
     });
   }
-  content.push({
-    type: "text",
-    text: `Customer note: "${input.note || "(no note)"}"${input.photo ? "" : "\n(No photo was provided — diagnose from the note alone and lower confidence.)"}`,
-  });
+  const lines = [`Customer note: "${input.note || "(no note)"}"`];
+  if (input.appliance && input.appliance !== "other") lines.push(`Customer says the appliance is: ${input.appliance}`);
+  if (input.brand) lines.push(`Customer says the brand is: ${input.brand}`);
+  if (input.appliance || input.brand) {
+    lines.push("Use the customer's appliance/brand when the photo doesn't show it. If the photo clearly shows something different, trust the photo.");
+  }
+  if (!input.photo) lines.push("(No photo was provided — diagnose from the text alone and lower confidence.)");
+  content.push({ type: "text", text: lines.join("\n") });
 
   const out = await twice("diagnose", async () => {
     const res = await client().messages.parse({
@@ -101,7 +107,7 @@ export async function diagnose(input: {
       source: "ai",
     };
   }
-  return fallbackDiagnosis(input.note);
+  return fallbackDiagnosis([input.note, input.appliance, input.brand].filter(Boolean).join(" "));
 }
 
 function fallbackDiagnosis(note: string): Diagnosis {

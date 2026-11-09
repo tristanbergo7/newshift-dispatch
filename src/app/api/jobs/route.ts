@@ -24,7 +24,7 @@ function parseDataUrl(dataUrl: string | undefined) {
 }
 
 export async function POST(req: Request) {
-  let body: { photo?: string; note?: string; name?: string; phone?: string; address?: string };
+  let body: { photo?: string; note?: string; name?: string; phone?: string; address?: string; appliance?: string; brand?: string };
   try {
     body = await req.json();
   } catch {
@@ -42,6 +42,8 @@ export async function POST(req: Request) {
       address: (body.address ?? "").trim(),
     },
     note: (body.note ?? "").trim(),
+    applianceHint: (body.appliance ?? "").trim().slice(0, 40) || undefined,
+    brandHint: (body.brand ?? "").trim().slice(0, 40) || undefined,
     hasPhoto: !!photo,
     status: "diagnosing",
   };
@@ -50,7 +52,7 @@ export async function POST(req: Request) {
 
   // Diagnosis is awaited so the customer's phone shows it.
   const t0 = Date.now();
-  const diagnosis = await diagnose({ note: job.note, photo });
+  const diagnosis = await diagnose({ note: job.note, photo, appliance: job.applianceHint, brand: job.brandHint });
   updateJob(job.id, { diagnosis, diagnosedMs: Date.now() - t0, status: "dispatching" });
 
   // Dispatch runs after the response; serialized so concurrent jobs see consistent availability.

@@ -47,6 +47,8 @@ export interface Job {
   createdAt: number;
   customer: { name: string; phone: string; address: string };
   note: string;
+  applianceHint?: string; // what the customer tapped
+  brandHint?: string; // what the customer typed
   hasPhoto: boolean;
   status: JobStatus;
   diagnosis?: Diagnosis;

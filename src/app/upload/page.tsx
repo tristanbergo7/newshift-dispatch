@@ -36,6 +36,17 @@ async function resizeImage(file: File, max = 1280): Promise<string> {
   }
 }
 
+const APPLIANCES = [
+  { value: "refrigerator", label: "Fridge", icon: "🧊" },
+  { value: "freezer", label: "Freezer", icon: "❄️" },
+  { value: "washer", label: "Washer", icon: "🫧" },
+  { value: "dryer", label: "Dryer", icon: "🌀" },
+  { value: "dishwasher", label: "Dishwasher", icon: "🍽️" },
+  { value: "oven/range", label: "Oven / Range", icon: "🔥" },
+  { value: "microwave", label: "Microwave", icon: "📡" },
+  { value: "other", label: "Other", icon: "🔧" },
+];
+
 const URGENCY_STYLE: Record<string, string> = {
   low: "bg-emerald-500/15 text-emerald-300",
   medium: "bg-amber-500/15 text-amber-300",
@@ -62,6 +73,8 @@ export default function UploadPage() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  const [appliance, setAppliance] = useState("");
+  const [brand, setBrand] = useState("");
   const [state, setState] = useState<"form" | "loading" | "done">("form");
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<Diagnosis | null>(null);
@@ -135,8 +148,8 @@ export default function UploadPage() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!photo && !note.trim()) {
-      setError("Add a photo or describe the problem.");
+    if (!photo && !note.trim() && !appliance) {
+      setError("Add a photo, pick the appliance, or describe the problem.");
       return;
     }
     setError(null);
@@ -145,7 +158,7 @@ export default function UploadPage() {
       const res = await fetch("/api/jobs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ photo, note, name, phone, address }),
+        body: JSON.stringify({ photo, note, name, phone, address, appliance, brand }),
       });
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();
@@ -275,10 +288,39 @@ export default function UploadPage() {
               </div>
             )}
 
+            <div>
+              <div className="mb-2 text-sm text-slate-400">What needs fixing?</div>
+              <div className="flex flex-wrap gap-2">
+                {APPLIANCES.map((a) => (
+                  <button
+                    key={a.value}
+                    type="button"
+                    onClick={() => setAppliance(appliance === a.value ? "" : a.value)}
+                    className={`rounded-full border px-3.5 py-2 text-sm ${
+                      appliance === a.value ? "border-sky-400 bg-sky-400 font-semibold text-[var(--navy-950)]" : "border-white/15 bg-white/5 text-slate-200"
+                    }`}
+                  >
+                    {a.icon} {a.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <input
+              className={input}
+              placeholder="Brand (optional), e.g. Samsung"
+              value={brand}
+              onChange={(e) => setBrand(e.target.value)}
+              list="brands"
+            />
+            <datalist id="brands">
+              {["Samsung", "LG", "Whirlpool", "GE", "Sub-Zero", "Maytag", "KitchenAid", "Bosch", "Frigidaire", "Wolf", "Viking", "Thermador", "Electrolux"].map((b) => (
+                <option key={b} value={b} />
+              ))}
+            </datalist>
             <textarea
               className={input}
               rows={2}
-              placeholder="What's wrong? e.g. fridge not cooling"
+              placeholder="What's wrong? e.g. not cooling, won't drain, no heat"
               value={note}
               onChange={(e) => setNote(e.target.value)}
             />
