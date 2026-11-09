@@ -32,6 +32,24 @@
 
 **Running long?** Cut the language and safety shot (66–73s) first, then shorten the sign-up shot.
 
+## On-screen captions (English + Korean)
+
+Big bold text, bottom of the frame, one caption per shot. In Clipchamp: Text → pick a bold style → set its length to match the shot. Korean is a draft translation: have a native speaker check it if you can.
+
+| Shot | English | 한국어 |
+|---|---|---|
+| 0–10s | Samsung & LG diagnose their own appliances. Independent shops can't. | 삼성·LG는 자사 가전을 스스로 진단합니다. 독립 수리점은 그럴 수 없습니다. |
+| 10–22s | One photo + one sentence. Any brand, any age, any language. | 사진 한 장, 한 문장. 모든 브랜드, 모든 연식, 모든 언어. |
+| 22–32s | AI diagnosis + price estimate in seconds | 몇 초 만에 AI 진단과 예상 수리비 |
+| 32–46s | Parts to bring + the right technician, picked by AI | 가져갈 부품과 최적의 기사를 AI가 선택 |
+| 46–56s | Customer books on their phone. Confirmation text sent. | 고객이 휴대폰으로 예약, 확인 문자 자동 발송 |
+| 56–66s | Plain-English dispatch rules | 일상 언어로 배차 규칙 설정 |
+| 66–73s | Any language · Safety first | 모든 언어 지원 · 안전 우선 |
+| 73–84s | Any repair shop: set up in 2 minutes | 어떤 수리점이든 2분이면 시작 |
+| 84–90s | NewShift: from one photo to a booked repair | NewShift: 사진 한 장에서 수리 예약까지 |
+
+Clipchamp can also auto-generate English subtitles from your voiceover (Captions → Turn on auto captions). If you use those, keep the bilingual titles above to just the 0–10s and 84–90s shots so the screen isn't crowded.
+
 **Before the rules shot:** the Samsung job already booked Mike's 1–3 PM slot, so the Sub-Zero job will offer Mike's 3–5 PM slot. That's expected.
 
 **Important after you submit:** the live link only works while your laptop runs both terminals. Keep it on, plugged in and awake until judging is over, or judges who click the link will see an error.
