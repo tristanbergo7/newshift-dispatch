@@ -1,74 +1,40 @@
-# NewShift Dispatch: demo kit
+# NewShift Dispatch: 90-second demo video
 
-## Before you go on stage (5 min)
+## Setup (5 min)
 
-1. Laptop plugged in, Wi-Fi on, phone charged, phone volume up (so the SMS ping is heard).
-2. Terminal 1: `npm run demo` (production build + server on :3000).
-3. Terminal 2: `npm run tunnel:fixed` (https://dispatch.newshiftai.com).
-4. Laptop browser, two tabs:
-   - https://dispatch.newshiftai.com/qr (full screen for the audience)
-   - https://dispatch.newshiftai.com/board (press **Reset** right before you start)
-5. Second screen or printed: the two demo photos
+1. Terminal 1: `npm run demo` · Terminal 2: `npm run tunnel:fixed`
+2. Laptop (Chrome, full screen with F11): https://dispatch.newshiftai.com/board → press **Reset**.
+3. Phone: open https://dispatch.newshiftai.com/upload and **refresh** it. Turn on Do Not Disturb (so only the NewShift text pops up) and raise the volume.
+4. Second screen, or print: the demo photo to snap
    - Samsung door (logo only): https://www.thedailymeal.com/img/gallery/4-common-complaints-customers-have-about-samsung-refrigerators/intro-1792696532.jpg
-   - Sub-Zero rating plate (1999): https://static.tildacdn.net/tild3331-6334-4932-a435-316563616564/sub-zero-serial-and-.jpg
-6. Phone: open https://dispatch.newshiftai.com/upload once so it's warm, then go back to the camera.
+   - Sub-Zero rating plate (1999), for the rules shot: https://static.tildacdn.net/tild3331-6334-4932-a435-316563616564/sub-zero-serial-and-.jpg
 
-If the internet dies: play the backup video.
+## How to record (Windows 11 + iPhone)
 
----
+- **Laptop:** Xbox Game Bar, **Win + Alt + R** to start and stop. It records the Chrome window.
+- **Phone:** Control Center → Screen Recording. Then AirDrop the clip or send it to the laptop.
+- **Edit in Clipchamp** (built into Windows 11): laptop clip full screen, phone clip as a picture-in-picture on the right. Trim every wait. Record the voiceover last over the finished cut (Clipchamp → Record & create → Audio).
+- Record each shot below as its own clip. You can retake any shot without redoing the rest.
 
-## Live demo script (~90 seconds)
+## Shot list + voiceover (~225 words ≈ 90 s)
 
-**[QR on screen]**
-> "Samsung and LG diagnose their own smart appliances and route you to their own techs. Independent repair shops get a phone call and a guess. We give every shop that ability, for any brand and any age, from one photo."
-
-**[Scan QR → photo of the Samsung door → tap Fridge → note: "fridge warm, freezer fine, frost on back wall" → name, your real number, address "Mission Valley 92108" → submit]**
-> "I'm the customer. One photo, one sentence."
-
-**[Phone shows diagnosis in ~3s]**
-> "It read the brand off the logo, figured out it's likely a defrost problem, and gave a price estimate. No model number is visible, so it doesn't invent one."
-
-**[Switch to board]**
-> "The shop sees the job instantly, with what to bring: defrost heater, thermostat, fan motor. So the tech fixes it on the first visit."
-> "The AI already picked the tech: Mike. Samsung certified, covers Mission Valley, free at 1."
-
-**[Phone: tap the Recommended time]**
-> "The customer picks a time. Or taps 'talk to a person' if they'd rather."
-
-**[Phone buzzes]**
-> "Booked, and the text is already on my phone. No phone tag, no dispatcher."
-
-**[Bonus, if time allows: board → + Add rule → "Never send Sub-Zero jobs to anyone but Mike" → Save → submit the Sub-Zero plate with address "800 Orange Ave, Coronado"]**
-> "Every shop has rules. The owner types one in plain English…" *(job goes to Mike, reason says "Sub-Zero rule")* "…and dispatch follows it immediately. A 1999 Sub-Zero, by the way: any age."
-
-**Any shop can sign up (30 seconds, strong closer before "Close")**
-> "And this isn't built for one shop."
-Open https://dispatch.newshiftai.com/setup → **Fill example** → Next through the steps (company, pricing, techs with brands, areas and time slots, rules, plan) → **Start free trial**.
-> "Any repair shop enters its techs, hours and pricing, and gets its own customer link, QR code and dispatch board in two minutes."
-Open their board link to show it's a separate, empty board with their own techs.
-
-**Optional 15-second extras (pick one if judges look engaged)**
-- Any language: submit a note in Korean or Spanish ("냉장고가 시원하지 않아요"). The whole phone screen and the SMS come back in that language; the board shows a 🌎 badge but keeps the shop's view in English.
-- Safety: submit "I smell gas near my stove". The phone shows "Do this right now" steps; the board pins a red EMERGENCY card on top.
-- Point at the header: photo → booked time, phone calls needed: 0.
-
-**Close**
-> "I already run this kind of dispatch for two real repair companies. Today we made it work from a single photo. That's NewShift."
-
----
-
-## Backup video: 60 seconds, shot list
-
-Record the screen (Win + Alt + R with Xbox Game Bar, or OBS) with your phone mirrored or filmed next to it.
-
-| Time | Show | Voiceover |
+| Time | On screen | Voiceover |
 |---|---|---|
-| 0–8s | QR page | "Independent repair shops can't diagnose like Samsung or LG can. Now they can, from one photo." |
-| 8–20s | Phone: photo of the Samsung fridge, tap Fridge, short note, submit | "The customer snaps a photo and writes one line." |
-| 20–30s | Phone diagnosis card | "In about four seconds: brand, likely issue, urgency and a price estimate." |
-| 30–42s | Board: new job, Bring parts, AI recommendation with reason | "The shop gets the job with the parts to bring, and the AI picks the right tech and says why." |
-| 42–52s | Phone: tap a time, then the booked screen; the SMS arriving | "The customer picks a time, and the confirmation text arrives." |
-| 52–60s | Board with a rule added, Sub-Zero job going to Mike | "Plain-English rules control dispatch. Any brand, any age. NewShift." |
+| 0–10s | Home page with logo (dispatch.newshiftai.com) | "Samsung and LG can diagnose their own appliances and send their own techs. Independent repair shops get a phone call and a guess. NewShift changes that, from one photo." |
+| 10–22s | **Phone:** snap the Samsung photo, tap **Fridge**, note "fridge warm, freezer fine, frost on back wall", name, your number, "Mission Valley 92108", submit | "A customer snaps a photo of their fridge and writes one line. Any brand, any age, any language." |
+| 22–32s | **Phone:** diagnosis card and price estimate | "In seconds, the AI reads the brand off the logo, finds the likely fault, flags urgency, and estimates the price from the shop's own rates." |
+| 32–46s | **Laptop board:** the job appears; zoom on **Bring:** parts and the AI recommendation with its reason | "The shop sees the job instantly, with the parts to bring, so it's fixed on the first visit. And the AI already picked the right tech: Mike, Samsung certified, covers Mission Valley, free at one." |
+| 46–56s | **Phone:** tap the Recommended time → Booked screen → the SMS arrives. **Board:** "Customer confirmed" tag | "The customer picks a time right on their phone, and the confirmation text arrives. No phone tag, no dispatcher." |
+| 56–66s | **Board:** + Add rule "Never send Sub-Zero jobs to anyone but Mike" → Save → submit the Sub-Zero plate with "800 Orange Ave, Coronado" → it goes to Mike with "Sub-Zero rule" | "Owners steer dispatch in plain English. 'Only Mike handles Sub-Zero', and the next Sub-Zero job goes straight to Mike." |
+| 66–73s | Quick cuts: phone screen in Korean ("냉장고가 시원하지 않아요"); red EMERGENCY card for "I smell gas near my stove" | "It speaks the customer's language, and when something's dangerous, safety steps come first." |
+| 73–84s | `/setup` → **Fill example** → click through → **Start free trial** → **Open my dashboard** | "And any repair shop can sign up in two minutes: techs, hours, pricing. They get their own link, QR code and dispatch board." |
+| 84–90s | End card: logo + dispatch.newshiftai.com + GitHub link | "We already run AI dispatch for two US repair companies. This is NewShift: from one photo to a booked repair." |
+
+**Running long?** Cut the language and safety shot (66–73s) first, then shorten the sign-up shot.
+
+**Before the rules shot:** the Samsung job already booked Mike's 1–3 PM slot, so the Sub-Zero job will offer Mike's 3–5 PM slot. That's expected.
+
+**Important after you submit:** the live link only works while your laptop runs both terminals. Keep it on, plugged in and awake until judging is over, or judges who click the link will see an error.
 
 ---
 
