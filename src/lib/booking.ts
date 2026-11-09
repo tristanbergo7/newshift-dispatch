@@ -81,7 +81,7 @@ async function sendConfirmation(id: string, companyName: string) {
     tech: techFirst,
     company: companyName,
     window: a.window,
-    appliance: english ? `${brand}${appliance}` : `${brand}${d.appliance_type}`.trim(),
+    appliance: english ? `${brand}${appliance}` : `${brand}${d.appliance_for_customer || d.appliance_type}`.trim(),
     issue: english ? d.likely_issue : d.issue_for_customer,
     price: d.est_price_low ? ` Est. $${d.est_price_low}–$${d.est_price_high}.` : "",
   });

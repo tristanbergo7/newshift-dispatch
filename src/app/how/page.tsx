@@ -28,7 +28,7 @@ const STEPS = [
     n: "2",
     icon: "🧠",
     title: "AI diagnoses it in seconds",
-    body: "Brand, model if visible, likely fault, urgency, honest confidence and a price estimate. Plus a tech brief: parts to bring and what to check first.",
+    body: "Brand, model if visible, likely fault, urgency and a price estimate. Plus a tech brief: parts to bring and what to check first.",
   },
   {
     n: "3",

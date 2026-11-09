@@ -210,7 +210,11 @@ export default function UploadView({ company }: { company: CompanyInfo }) {
               <div className="text-xs uppercase tracking-wider text-sky-300">{t("diagnosis")}</div>
               <div className="mt-1 text-2xl font-bold">
                 {result.brand !== "Unknown" ? result.brand + " " : ""}
-                <span className="capitalize">{result.appliance_type}</span>
+                <span className="capitalize">
+                  {result.language && !result.language.startsWith("en") && result.appliance_for_customer
+                    ? result.appliance_for_customer
+                    : result.appliance_type}
+                </span>
               </div>
               {result.model && <div className="text-sm text-slate-400">Model {result.model}</div>}
               <div className="mt-4 text-sm text-slate-400">{t("likely_issue")}</div>
@@ -219,9 +223,6 @@ export default function UploadView({ company }: { company: CompanyInfo }) {
               <div className="mt-4 flex flex-wrap gap-2 text-sm">
                 <span className={`rounded-full px-3 py-1 capitalize ${URGENCY_STYLE[result.urgency] ?? ""}`}>
                   {result.urgency} {t("urgency")}
-                </span>
-                <span className="rounded-full bg-white/10 px-3 py-1">
-                  {Math.round(result.confidence * 100)}% {t("confident")}
                 </span>
               </div>
               {result.est_price_low > 0 && (

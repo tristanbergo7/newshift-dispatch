@@ -17,6 +17,7 @@ export interface Diagnosis {
   language: string; // customer's language, ISO 639-1 (en, es, ko, vi, zh, tl, ...)
   language_name: string; // e.g. "Español", shown on the board
   issue_for_customer: string; // likely_issue in the customer's language (used in SMS + phone)
+  appliance_for_customer?: string; // appliance name in the customer's language
   ui: Record<string, string>; // customer-screen labels in their language
   sms_template: string; // confirmation SMS in their language with {name} {tech} {window} {appliance} {issue} {price}
   source: "ai" | "fallback";

@@ -26,7 +26,7 @@ If the internet dies: play the backup video.
 > "I'm the customer. One photo, one sentence."
 
 **[Phone shows diagnosis in ~3s]**
-> "It read the brand off the logo, figured out it's likely a defrost problem, and tells us how confident it is. No model number is visible, so it doesn't invent one."
+> "It read the brand off the logo, figured out it's likely a defrost problem, and gave a price estimate. No model number is visible, so it doesn't invent one."
 
 **[Switch to board]**
 > "The shop sees the job instantly, with what to bring: defrost heater, thermostat, fan motor. So the tech fixes it on the first visit."
@@ -65,7 +65,7 @@ Record the screen (Win + Alt + R with Xbox Game Bar, or OBS) with your phone mir
 |---|---|---|
 | 0–8s | QR page | "Independent repair shops can't diagnose like Samsung or LG can. Now they can, from one photo." |
 | 8–20s | Phone: photo of the Samsung fridge, tap Fridge, short note, submit | "The customer snaps a photo and writes one line." |
-| 20–30s | Phone diagnosis card | "In about three seconds: brand, likely issue, urgency, confidence." |
+| 20–30s | Phone diagnosis card | "In about four seconds: brand, likely issue, urgency and a price estimate." |
 | 30–42s | Board: new job, Bring parts, AI recommendation with reason | "The shop gets the job with the parts to bring, and the AI picks the right tech and says why." |
 | 42–52s | Phone: tap a time, then the booked screen; the SMS arriving | "The customer picks a time, and the confirmation text arrives." |
 | 52–60s | Board with a rule added, Sub-Zero job going to Mike | "Plain-English rules control dispatch. Any brand, any age. NewShift." |
@@ -81,7 +81,7 @@ Record the screen (Win + Alt + R with Xbox Game Bar, or OBS) with your phone mir
 **Description:**
 Samsung and LG can diagnose their own smart appliances and send their own technicians. The independent repair shops that fix everything else, every brand and every age, still run on phone calls and guesswork. NewShift Dispatch gives them that diagnostic ability.
 
-A customer scans a QR code or taps a link, snaps a photo of the broken appliance or its model sticker, and adds one sentence. In a few seconds the AI identifies the brand, the model when it's readable, the appliance type, the likely fault, urgency, and confidence. It also writes a tech brief: which parts to bring, what to check first, and the expected repair time, so the job gets fixed on the first visit. The customer sees an estimated price range before booking. Customers can write in any language, and the diagnosis, booking screen and SMS come back in their language. Safety risks such as a gas smell, sparks or flooding trigger immediate safety steps on the customer's phone and a red priority card for the shop.
+A customer scans a QR code or taps a link, snaps a photo of the broken appliance or its model sticker, and adds one sentence. In a few seconds the AI identifies the brand, the model when it's readable, the appliance type, the likely fault and urgency. It also writes a tech brief: which parts to bring, what to check first, and the expected repair time, so the job gets fixed on the first visit. The customer sees an estimated price range before booking. Customers can write in any language, and the diagnosis, booking screen and SMS come back in their language. Safety risks such as a gas smell, sparks or flooding trigger immediate safety steps on the customer's phone and a red priority card for the shop.
 
 The job lands on the shop's live dispatch board. The AI picks the best technician based on brand certification, skills, service area, and availability, and explains its choice in one line. The customer picks one of the offered times (or asks for a call from a person), and an SMS confirmation goes out automatically. Shop owners can steer dispatch with plain-English rules such as "Never send Sub-Zero jobs to anyone but Mike", and they apply to the next job right away.
 

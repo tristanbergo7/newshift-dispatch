@@ -336,7 +336,6 @@ function JobCard({ job, tech, fresh }: { job: Job; tech?: Tech; fresh: boolean }
                   <span className="rounded-full bg-fuchsia-400/15 px-2.5 py-1 text-fuchsia-200">🌎 {d.language_name || d.language}</span>
                 )}
                 <span className={`rounded-full px-2.5 py-1 capitalize ${URGENCY[d.urgency] ?? ""}`}>{d.urgency}</span>
-                <span className="rounded-full bg-white/10 px-2.5 py-1">{Math.round(d.confidence * 100)}%</span>
                 {d.est_price_low > 0 && (
                   <span className="rounded-full bg-emerald-400/15 px-2.5 py-1 text-emerald-200">
                     ${d.est_price_low}–${d.est_price_high}
@@ -401,6 +400,11 @@ function JobCard({ job, tech, fresh }: { job: Job; tech?: Tech; fresh: boolean }
                   </div>
                   <div className="mt-1 text-sm text-slate-300">{a.reason}</div>
                   {job.rulesApplied && <div className="mt-1 text-[11px] text-amber-300">⚑ Dispatch rules applied</div>}
+                  {job.bookedAt && (
+                    <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-emerald-400/15 px-2.5 py-1 text-xs font-semibold text-emerald-200">
+                      ✓ Customer confirmed this time on their phone
+                    </div>
+                  )}
                 </>
               ) : job.status === "error" ? (
                 <div className="mt-1 text-sm text-red-300">Dispatch failed</div>

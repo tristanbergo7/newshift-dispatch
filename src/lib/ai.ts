@@ -50,6 +50,7 @@ const DiagnosisSchema = z.object({
   language: z.string(),
   language_name: z.string(),
   issue_for_customer: z.string(),
+  appliance_for_customer: z.string(),
   ui: z.object(Object.fromEntries(Object.keys(UI_EN).map((k) => [k, z.string()])) as Record<UiKey, z.ZodString>),
   sms_template: z.string(),
 });
@@ -79,6 +80,7 @@ Language (the customer may write in ANY language):
 - language: ISO 639-1 code of the language the customer wrote their note in. If the note is empty or too short to tell, use the phone language hint, else "en".
 - language_name: that language's name in itself (e.g. "English", "Español", "한국어", "Tiếng Việt").
 - issue_for_customer: likely_issue phrased for the customer in their language, max 6 words (identical to likely_issue for English).
+- appliance_for_customer: the appliance name in the customer's language, lowercase, 1–2 words (e.g. "fridge", "lavadora", "냉장고").
 - ui: if language is "en", return every value as an empty string. Otherwise translate each of these English screen labels into the customer's language, keeping {placeholders} exactly as written:
 ${JSON.stringify(UI_EN)}
 - sms_template: if language is "en", return an empty string. Otherwise translate this confirmation text into the customer's language, keeping every {placeholder} exactly as written:
