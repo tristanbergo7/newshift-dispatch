@@ -88,7 +88,18 @@ export async function diagnose(input: {
   });
 
   if (out) {
-    return { ...out, confidence: Math.max(0, Math.min(1, out.confidence)), source: "ai" };
+    // Strip stray JSON punctuation the model occasionally leaves at the end of a string.
+    const clean = (s: string) => s.trim().replace(/[\s{}[\]"]+$/, "").trim();
+    return {
+      ...out,
+      brand: clean(out.brand),
+      appliance_type: clean(out.appliance_type),
+      likely_issue: clean(out.likely_issue),
+      summary: clean(out.summary),
+      model: out.model ? clean(out.model) || null : null,
+      confidence: Math.max(0, Math.min(1, out.confidence)),
+      source: "ai",
+    };
   }
   return fallbackDiagnosis(input.note);
 }

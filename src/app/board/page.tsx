@@ -109,7 +109,7 @@ export default function BoardPage() {
             </div>
           )}
           {jobs.map((j) => (
-            <JobCard key={j.id} job={j} tech={j.assignment ? techById[j.assignment.tech_id] : undefined} fresh={fresh.has(j.id)} />
+            <JobCard key={j.id} job={j} tech={techById[(j.assignment ?? j.options?.[0])?.tech_id ?? ""]} fresh={fresh.has(j.id)} />
           ))}
         </section>
 
@@ -270,6 +270,11 @@ function JobCard({ job, tech, fresh }: { job: Job; tech?: Tech; fresh: boolean }
               <div className="text-sm text-slate-400">
                 {job.customer.name} · {job.customer.address || "no address"} · {ago(job.createdAt)}
               </div>
+              {job.callbackRequested && (
+                <div className="mt-1.5 inline-flex items-center gap-1.5 rounded-full bg-amber-400/20 px-2.5 py-1 text-xs font-semibold text-amber-200">
+                  📞 Customer wants a call{job.customer.phone ? `: ${job.customer.phone}` : ""}
+                </div>
+              )}
             </div>
             {d && (
               <div className="flex shrink-0 gap-2 text-xs">
@@ -293,8 +298,22 @@ function JobCard({ job, tech, fresh }: { job: Job; tech?: Tech; fresh: boolean }
 
           <div className="mt-3 grid gap-3 md:grid-cols-2">
             <div className="rounded-xl bg-[var(--navy-800)] p-3">
-              <div className="text-[11px] uppercase tracking-wider text-slate-400">Assigned tech</div>
-              {a ? (
+              <div className="text-[11px] uppercase tracking-wider text-slate-400">
+                {a ? "Booked tech" : job.status === "awaiting_customer" ? "AI recommendation" : "Assigned tech"}
+              </div>
+              {!a && job.status === "awaiting_customer" && job.options?.[0] ? (
+                <>
+                  <div className="mt-1 flex items-center gap-2 font-semibold">
+                    <span className="h-2.5 w-2.5 rounded-full" style={{ background: tech?.color ?? "#38bdf8" }} />
+                    {job.options[0].tech_name} <span className="font-normal text-emerald-300">· {job.options[0].window}</span>
+                  </div>
+                  <div className="mt-1 text-sm text-slate-300">{job.options[0].reason}</div>
+                  {job.rulesApplied && <div className="mt-1 text-[11px] text-amber-300">⚑ Dispatch rules applied</div>}
+                  <div className="mt-2 flex items-center gap-2 text-xs text-sky-200">
+                    <Spinner /> Customer choosing from {job.options.length} time{job.options.length === 1 ? "" : "s"}…
+                  </div>
+                </>
+              ) : a ? (
                 <>
                   <div className="mt-1 flex items-center gap-2 font-semibold">
                     <span className="h-2.5 w-2.5 rounded-full" style={{ background: tech?.color ?? "#38bdf8" }} />
@@ -324,7 +343,7 @@ function JobCard({ job, tech, fresh }: { job: Job; tech?: Tech; fresh: boolean }
               {job.sms ? (
                 <div className="mt-2 rounded-2xl rounded-bl-sm bg-sky-500/20 px-3 py-2 text-sm text-sky-50">{job.sms.body}</div>
               ) : (
-                <div className="mt-1 text-sm text-slate-500">{a ? "Sending…" : "—"}</div>
+                <div className="mt-1 text-sm text-slate-500">{a ? "Sending…" : "Sent once the customer books"}</div>
               )}
             </div>
           </div>

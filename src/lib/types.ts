@@ -40,7 +40,7 @@ export interface SmsResult {
   sid?: string;
 }
 
-export type JobStatus = "diagnosing" | "dispatching" | "assigned" | "error";
+export type JobStatus = "diagnosing" | "dispatching" | "awaiting_customer" | "assigned" | "error";
 
 export interface Job {
   id: string;
@@ -52,6 +52,8 @@ export interface Job {
   diagnosis?: Diagnosis;
   diagnosedMs?: number;
   assignment?: Assignment;
+  options?: Assignment[]; // time slots offered to the customer; options[0] = AI recommendation
+  callbackRequested?: boolean;
   sms?: SmsResult;
   rulesApplied?: string;
 }

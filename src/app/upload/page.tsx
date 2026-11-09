@@ -2,8 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 
+interface Slot {
+  tech_name: string;
+  window: string;
+}
 interface JobStatus {
-  assignment: { tech_name: string; window: string } | null;
+  status: string;
+  options: Slot[] | null;
+  assignment: Slot | null;
+  callbackRequested: boolean;
   sms: { status: string } | null;
 }
 import type { Diagnosis } from "@/lib/types";
@@ -60,8 +67,15 @@ export default function UploadPage() {
   const [result, setResult] = useState<Diagnosis | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
   const [live, setLive] = useState<JobStatus | null>(null);
+  const [booking, setBooking] = useState<number | null>(null);
+  const [bookError, setBookError] = useState<string | null>(null);
 
-  // Follow the job until the tech is assigned and the SMS has gone out.
+  async function refresh(id: string) {
+    const r = await fetch(`/api/jobs/${id}`, { cache: "no-store" });
+    if (r.ok) setLive(await r.json());
+  }
+
+  // Follow the job: time options → booked → SMS sent.
   useEffect(() => {
     if (!jobId) return;
     let stop = false;
@@ -81,6 +95,31 @@ export default function UploadPage() {
       stop = true;
     };
   }, [jobId]);
+
+  async function book(i: number) {
+    if (!jobId || booking !== null) return;
+    setBooking(i);
+    setBookError(null);
+    try {
+      const r = await fetch(`/api/jobs/${jobId}/book`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ option: i }),
+      });
+      if (!r.ok) setBookError((await r.json().catch(() => ({}))).error ?? "Couldn't book that time. Try another.");
+      await refresh(jobId);
+    } catch {
+      setBookError("Connection problem. Please try again.");
+    } finally {
+      setBooking(null);
+    }
+  }
+
+  async function askForCall() {
+    if (!jobId) return;
+    await fetch(`/api/jobs/${jobId}/callback`, { method: "POST" }).catch(() => {});
+    await refresh(jobId);
+  }
   const cameraRef = useRef<HTMLInputElement>(null);
   const libraryRef = useRef<HTMLInputElement>(null);
 
@@ -152,21 +191,55 @@ export default function UploadPage() {
                 <span className="rounded-full bg-white/10 px-3 py-1">{Math.round(result.confidence * 100)}% confident</span>
               </div>
             </div>
-            <div className="space-y-3 rounded-2xl bg-[var(--navy-800)] p-5">
-              <Step done label="Diagnosis complete" />
-              <Step
-                done={!!live?.assignment}
-                label={
-                  live?.assignment
-                    ? `${live.assignment.tech_name.split(" ")[0]} will arrive ${live.assignment.window}`
-                    : "Finding the best technician…"
-                }
-              />
-              <Step
-                done={!!live?.sms}
-                label={live?.sms ? (live.sms.status === "sent" ? "Confirmation text sent to your phone" : "Confirmation on its way") : live?.assignment ? "Texting you…" : "A technician will text you shortly"}
-              />
-            </div>
+            {live?.assignment ? (
+              <div className="space-y-3 rounded-2xl bg-emerald-500/10 p-5">
+                <Step done label={`Booked: ${live.assignment.tech_name.split(" ")[0]}, ${live.assignment.window}`} />
+                <Step
+                  done={!!live.sms}
+                  label={live.sms ? (live.sms.status === "sent" ? "Confirmation text sent to your phone" : "Confirmation on its way") : "Texting you a confirmation…"}
+                />
+              </div>
+            ) : live?.status === "awaiting_customer" && live.options?.length ? (
+              <div className="rounded-2xl bg-[var(--navy-800)] p-5">
+                <div className="text-lg font-semibold">Pick a time for your repair</div>
+                <div className="mt-3 space-y-2">
+                  {live.options.map((o, i) => (
+                    <button
+                      key={i}
+                      onClick={() => book(i)}
+                      disabled={booking !== null}
+                      className={`flex w-full items-center justify-between rounded-xl border px-4 py-3.5 text-left active:scale-[0.99] disabled:opacity-60 ${
+                        i === 0 ? "border-sky-400 bg-sky-400/10" : "border-white/10 bg-white/5"
+                      }`}
+                    >
+                      <span>
+                        <span className="block text-base font-semibold">{o.window}</span>
+                        <span className="text-sm text-slate-400">with {o.tech_name.split(" ")[0]}</span>
+                      </span>
+                      {booking === i ? (
+                        <span className="h-5 w-5 animate-spin rounded-full border-2 border-sky-300 border-t-transparent" />
+                      ) : i === 0 ? (
+                        <span className="rounded-full bg-sky-400 px-2.5 py-1 text-xs font-bold text-[var(--navy-950)]">Recommended</span>
+                      ) : null}
+                    </button>
+                  ))}
+                </div>
+                {bookError && <div className="mt-3 rounded-lg bg-red-500/15 px-3 py-2 text-sm text-red-200">{bookError}</div>}
+                <div className="mt-4 border-t border-white/10 pt-4 text-center">
+                  {live.callbackRequested ? (
+                    <div className="text-sm text-emerald-300">✓ Got it. A team member will call you shortly.</div>
+                  ) : (
+                    <button onClick={askForCall} className="text-sm text-slate-300 underline">
+                      Rather talk to a person? Request a call
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-2xl bg-[var(--navy-800)] p-5">
+                <Step label={live?.status === "error" ? "We'll call you to schedule." : "Finding the best technician and times…"} done={live?.status === "error"} />
+              </div>
+            )}
           </section>
         ) : (
           <form onSubmit={submit} className="space-y-4">
