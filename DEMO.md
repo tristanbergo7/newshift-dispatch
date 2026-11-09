@@ -76,6 +76,15 @@ Record the screen (Win + Alt + R with Xbox Game Bar, or OBS) with your phone mir
 
 **Name:** NewShift Dispatch
 
+**Links:**
+- Live demo: https://dispatch.newshiftai.com
+- GitHub: https://github.com/tristanbergo7/newshift-dispatch
+
+**Tagline:** From one photo to a booked repair.
+
+**Short description (for the submission form):**
+NewShift Dispatch gives independent appliance repair shops what Samsung and LG keep for themselves: diagnosis from a single photo, for any brand and any age. A customer snaps a photo and writes one line in any language; AI identifies the appliance and likely fault, estimates the price, picks the right certified technician with the parts to bring, and the customer books a time and gets a text. Any shop can sign up in two minutes and get its own customer link, QR code and dispatch board.
+
 **One-liner:** Photo-to-booked-repair for independent appliance shops: AI diagnoses any brand from one photo, picks the right technician, and texts the customer.
 
 **Description:**
