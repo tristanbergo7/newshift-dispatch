@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { SESSION_COOKIE, cookieOptions, hashPassword, makeToken } from "@/lib/auth";
 import { saveCompanies, store } from "@/lib/store";
 import type { Company, Tech } from "@/lib/types";
 
@@ -32,6 +33,8 @@ function slugify(name: string) {
 export async function POST(req: Request) {
   const body = (await req.json().catch(() => null)) as {
     name?: string;
+    email?: string;
+    password?: string;
     phone?: string;
     serviceArea?: string;
     serviceCall?: number;
@@ -42,6 +45,13 @@ export async function POST(req: Request) {
   } | null;
   const name = (body?.name ?? "").trim().slice(0, 60);
   if (!name) return NextResponse.json({ error: "Company name is required" }, { status: 400 });
+  const email = (body?.email ?? "").trim().toLowerCase().slice(0, 120);
+  const password = body?.password ?? "";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return NextResponse.json({ error: "Enter a valid email" }, { status: 400 });
+  if (password.length < 8) return NextResponse.json({ error: "Password must be at least 8 characters" }, { status: 400 });
+  if ([...store().companies.values()].some((c) => c.email === email)) {
+    return NextResponse.json({ error: "That email already has an account. Sign in instead." }, { status: 409 });
+  }
 
   const techs: Tech[] = (body?.techs ?? [])
     .filter((t) => (t.name ?? "").trim())
@@ -83,8 +93,13 @@ export async function POST(req: Request) {
     techs,
     rules: (body?.rules ?? "").slice(0, 4000),
     createdAt: Date.now(),
+    email,
+    passwordHash: hashPassword(password),
   };
   s.companies.set(slug, company);
   saveCompanies();
-  return NextResponse.json({ slug });
+  // Signed in right away, so "Open my dashboard" works.
+  const res = NextResponse.json({ slug });
+  res.cookies.set(SESSION_COOKIE, makeToken(slug), cookieOptions);
+  return res;
 }

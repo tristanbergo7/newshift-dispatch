@@ -1,10 +1,64 @@
-import { DEMO_SLUG, store } from "@/lib/store";
+import Link from "next/link";
+import { currentSession } from "@/lib/auth";
+import { DEMO_SLUG, getCompany, store } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "NewShift Dispatch" };
 
-// Main dashboard: every shop on NewShift, one click into each shop's dashboard.
-export default function Home() {
+export default async function Home() {
+  const { admin, shop } = await currentSession();
+  if (admin) return <AdminHome />;
+  return <PublicHome shopSlug={shop && getCompany(shop) ? shop : null} />;
+}
+
+// Public front door: try the demo, sign in, or set up a shop.
+function PublicHome({ shopSlug }: { shopSlug: string | null }) {
+  const shop = shopSlug ? getCompany(shopSlug) : null;
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[var(--navy-900)] to-[var(--navy-950)] px-4 py-12">
+      <div className="w-full max-w-3xl text-center">
+        <img src="/newshift-logo-white.svg" alt="NewShift AI" className="mx-auto h-16 w-auto" />
+        <h1 className="mt-6 text-4xl font-bold leading-tight sm:text-5xl">
+          From one photo to a <span className="text-sky-300">booked repair</span>.
+        </h1>
+        <p className="mx-auto mt-4 max-w-xl text-lg text-slate-300">
+          AI photo diagnosis and automatic dispatch for independent appliance repair shops. Any brand, any age, any language.
+        </p>
+        <div className="mt-8 grid gap-3 sm:grid-cols-3">
+          <a href="/board" className="rounded-2xl border border-sky-400/40 bg-sky-400/10 p-5 hover:border-sky-400">
+            <div className="text-2xl">🎬</div>
+            <div className="mt-2 font-semibold">Try the live demo</div>
+            <div className="text-sm text-slate-400">NewShift Repair, San Diego</div>
+          </a>
+          {shop ? (
+            <a href={`/c/${shop.slug}/board`} className="rounded-2xl border border-white/10 bg-[var(--navy-900)] p-5 hover:border-sky-400">
+              <div className="text-2xl">🗂️</div>
+              <div className="mt-2 font-semibold">Go to my dashboard</div>
+              <div className="text-sm text-slate-400">{shop.name}</div>
+            </a>
+          ) : (
+            <Link href="/login" className="rounded-2xl border border-white/10 bg-[var(--navy-900)] p-5 hover:border-sky-400">
+              <div className="text-2xl">🔐</div>
+              <div className="mt-2 font-semibold">Sign in</div>
+              <div className="text-sm text-slate-400">Already a NewShift shop</div>
+            </Link>
+          )}
+          <a href="/setup" className="rounded-2xl border border-emerald-400/40 bg-emerald-400/10 p-5 hover:border-emerald-400">
+            <div className="text-2xl">🚀</div>
+            <div className="mt-2 font-semibold">Set up your shop</div>
+            <div className="text-sm text-slate-400">About 2 minutes, free trial</div>
+          </a>
+        </div>
+        <a href="/how" className="mt-6 inline-block text-sm text-slate-400 hover:text-white">
+          How it works →
+        </a>
+      </div>
+    </main>
+  );
+}
+
+// Owner view: every shop on NewShift, one click into each shop's dashboard.
+function AdminHome() {
   const s = store();
   const shops = [...s.companies.values()].sort((a, b) =>
     a.slug === DEMO_SLUG ? -1 : b.slug === DEMO_SLUG ? 1 : b.createdAt - a.createdAt,
@@ -31,10 +85,10 @@ export default function Home() {
       <div className="mx-auto max-w-6xl">
         <header className="flex flex-wrap items-center justify-between gap-3 py-6">
           <div className="flex items-center gap-3">
-            <div className="grid h-10 w-10 place-items-center rounded-lg bg-sky-400 text-xl font-black text-[var(--navy-950)]">N</div>
+            <img src="/newshift-logo-white.svg" alt="NewShift AI" className="h-10 w-auto" />
             <div>
-              <div className="text-xl font-semibold">NewShift Dispatch</div>
-              <div className="text-xs text-slate-400">AI photo diagnosis and dispatch for independent repair shops</div>
+              <div className="text-xl font-semibold">Dispatch</div>
+              <div className="text-xs text-slate-400">Admin · all shops</div>
             </div>
           </div>
           <div className="flex gap-2 text-sm">

@@ -37,6 +37,10 @@ export default function BoardView({ company }: { company: { slug: string; name: 
     async function tick() {
       try {
         const res = await fetch(`/api/jobs?c=${company.slug}`, { cache: "no-store" });
+        if (res.status === 401) {
+          window.location.href = `/login?next=${encodeURIComponent(window.location.pathname)}`;
+          return;
+        }
         const data = await res.json();
         if (!alive) return;
         const list: Job[] = data.jobs;
@@ -84,13 +88,17 @@ export default function BoardView({ company }: { company: { slug: string; name: 
       {sharing && <SharePanel company={company} onClose={() => setSharing(false)} />}
       <header className="flex items-center justify-between border-b border-white/10 bg-[var(--navy-900)] px-6 py-4">
         <div className="flex items-center gap-3">
-          <Link href="/" className="mr-1 rounded-lg px-2 py-1 text-sm text-slate-400 hover:bg-white/5 hover:text-white" title="All shops">
-            ← Shops
+          <Link href="/" className="mr-1 rounded-lg px-2 py-1 text-sm text-slate-400 hover:bg-white/5 hover:text-white" title="Home">
+            ← Home
           </Link>
           <div className="grid h-10 w-10 place-items-center rounded-lg bg-sky-400 text-xl font-black text-[var(--navy-950)]">{company.name[0]?.toUpperCase()}</div>
           <div>
             <div className="text-xl font-semibold">{company.name}</div>
-            <div className="text-xs text-slate-400">Dispatch board · powered by NewShift AI</div>
+            <div className="flex items-center gap-1.5 text-xs text-slate-400">
+              Dispatch board · powered by
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/newshift-logo-white.svg" alt="NewShift AI" className="h-6 w-auto" />
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-6 text-sm">
@@ -112,6 +120,17 @@ export default function BoardView({ company }: { company: { slug: string; name: 
           <button onClick={reset} className="rounded-lg border border-white/10 px-3 py-1.5 text-slate-400 hover:text-white">
             Reset
           </button>
+          {company.slug !== "demo" && (
+            <button
+              onClick={async () => {
+                await fetch("/api/auth/logout", { method: "POST" });
+                window.location.href = "/login";
+              }}
+              className="rounded-lg px-2 py-1.5 text-slate-400 hover:text-white"
+            >
+              Sign out
+            </button>
+          )}
         </div>
       </header>
 

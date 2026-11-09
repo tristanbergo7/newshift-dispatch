@@ -57,8 +57,8 @@ export default async function HowPage() {
       <div className="mx-auto max-w-5xl">
         <header className="flex items-center justify-between py-6">
           <div className="flex items-center gap-3">
-            <div className="grid h-10 w-10 place-items-center rounded-lg bg-sky-400 text-xl font-black text-[var(--navy-950)]">N</div>
-            <div className="text-lg font-semibold">NewShift Dispatch</div>
+            <img src="/newshift-logo-white.svg" alt="NewShift AI" className="h-10 w-auto" />
+            <span className="rounded-md bg-white/10 px-2 py-0.5 text-xs text-slate-300">Dispatch</span>
           </div>
           <a href="/board" className="rounded-lg border border-white/15 px-3 py-1.5 text-sm text-slate-300 hover:text-white">
             Dispatch board →

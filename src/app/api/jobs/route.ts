@@ -3,6 +3,7 @@ import { randomUUID } from "crypto";
 import { diagnose } from "@/lib/ai";
 import { runDispatch } from "@/lib/booking";
 import { getCompany, store, updateJob } from "@/lib/store";
+import { canAccess } from "@/lib/auth";
 import type { Job } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -11,6 +12,7 @@ export const dynamic = "force-dynamic";
 export async function GET(req: Request) {
   const company = getCompany(new URL(req.url).searchParams.get("c"));
   if (!company) return NextResponse.json({ error: "Company not found" }, { status: 404 });
+  if (!(await canAccess(company.slug))) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
   return NextResponse.json({
     company: { slug: company.slug, name: company.name },
     jobs: store()

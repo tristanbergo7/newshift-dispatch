@@ -43,6 +43,8 @@ export default function SetupPage() {
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [serviceArea, setServiceArea] = useState("");
   const [serviceCall, setServiceCall] = useState(89);
   const [laborPerHour, setLaborPerHour] = useState(120);
@@ -60,6 +62,9 @@ export default function SetupPage() {
   function fillExample() {
     setName("Coastal Appliance Repair");
     setPhone("(619) 555-0123");
+    // Unique example login each time, so the demo can be repeated.
+    setEmail(`owner${Math.floor(Math.random() * 1e5)}@coastal-repair.test`);
+    setPassword(`demo-${Math.random().toString(36).slice(2, 10)}`);
     setServiceArea("San Diego County");
     setServiceCall(95);
     setLaborPerHour(130);
@@ -71,7 +76,7 @@ export default function SetupPage() {
   }
 
   function canNext() {
-    if (step === 0) return name.trim().length > 1;
+    if (step === 0) return name.trim().length > 1 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) && password.length >= 8;
     if (step === 2) return techs.some((t) => t.name.trim() && t.windows.length);
     return true;
   }
@@ -85,6 +90,8 @@ export default function SetupPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name,
+          email,
+          password,
           phone,
           serviceArea,
           serviceCall,
@@ -128,6 +135,9 @@ export default function SetupPage() {
               Your QR code, this link and a website button are always one click away under <b>Share &amp; QR</b> on your dashboard.
             </div>
           </div>
+          <div className="mt-3 text-center text-sm text-slate-400">
+            You&apos;re signed in. Next time, sign in at <b>/login</b> with <span className="text-slate-200">{email}</span>.
+          </div>
         </div>
       </main>
     );
@@ -141,7 +151,7 @@ export default function SetupPage() {
             <Link href="/" className="rounded-lg px-2 py-1 text-sm text-slate-400 hover:bg-white/5 hover:text-white">
               ←
             </Link>
-            <div className="grid h-10 w-10 place-items-center rounded-lg bg-sky-400 text-xl font-black text-[var(--navy-950)]">N</div>
+            <img src="/newshift-logo-white.svg" alt="NewShift AI" className="h-9 w-auto" />
             <div>
               <div className="text-lg font-semibold">Set up NewShift for your shop</div>
               <div className="text-xs text-slate-400">About 2 minutes</div>
@@ -166,6 +176,15 @@ export default function SetupPage() {
             <div className="space-y-3">
               <h2 className="text-xl font-semibold">Your company</h2>
               <input className={input} placeholder="Company name" value={name} onChange={(e) => setName(e.target.value)} />
+              <input className={input} type="email" placeholder="Your email (for signing in)" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+              <input
+                className={input}
+                type="password"
+                placeholder="Create a password (8+ characters)"
+                autoComplete="new-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
               <input className={input} placeholder="Office phone (for customers who want a call)" value={phone} onChange={(e) => setPhone(e.target.value)} />
               <input className={input} placeholder="Service area (e.g. San Diego County)" value={serviceArea} onChange={(e) => setServiceArea(e.target.value)} />
             </div>
@@ -322,6 +341,7 @@ export default function SetupPage() {
               </button>
             )}
           </div>
+          {step === 0 && !canNext() && <p className="mt-2 text-right text-xs text-slate-500">Company name, email and an 8+ character password</p>}
           {step === 2 && !canNext() && <p className="mt-2 text-right text-xs text-slate-500">Add a name and at least one time slot</p>}
         </section>
       </div>

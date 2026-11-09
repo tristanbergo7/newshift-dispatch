@@ -62,6 +62,8 @@ export interface Company {
   techs: Tech[];
   rules: string;
   createdAt: number;
+  email?: string; // shop login
+  passwordHash?: string; // scrypt salt:hash, never sent to the browser
 }
 
 export type JobStatus = "diagnosing" | "dispatching" | "awaiting_customer" | "assigned" | "error";
