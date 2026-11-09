@@ -41,6 +41,11 @@ If the internet dies: play the backup video.
 **[Bonus, if time allows: board → + Add rule → "Never send Sub-Zero jobs to anyone but Mike" → Save → submit the Sub-Zero plate with address "800 Orange Ave, Coronado"]**
 > "Every shop has rules. The owner types one in plain English…" *(job goes to Mike, reason says "Sub-Zero rule")* "…and dispatch follows it immediately. A 1999 Sub-Zero, by the way: any age."
 
+**Optional 15-second extras (pick one if judges look engaged)**
+- Any language: submit a note in Korean or Spanish ("냉장고가 시원하지 않아요"). The whole phone screen and the SMS come back in that language; the board shows a 🌎 badge but keeps the shop's view in English.
+- Safety: submit "I smell gas near my stove". The phone shows "Do this right now" steps; the board pins a red EMERGENCY card on top.
+- Point at the header: photo → booked time, phone calls needed: 0.
+
 **Close**
 > "I already run this kind of dispatch for two real repair companies. Today we made it work from a single photo. That's NewShift."
 
@@ -70,7 +75,7 @@ Record the screen (Win + Alt + R with Xbox Game Bar, or OBS) with your phone mir
 **Description:**
 Samsung and LG can diagnose their own smart appliances and send their own technicians. The independent repair shops that fix everything else, every brand and every age, still run on phone calls and guesswork. NewShift Dispatch gives them that diagnostic ability.
 
-A customer scans a QR code or taps a link, snaps a photo of the broken appliance or its model sticker, and adds one sentence. In a few seconds the AI identifies the brand, the model when it's readable, the appliance type, the likely fault, urgency, and confidence. It also writes a tech brief: which parts to bring, what to check first, and the expected repair time, so the job gets fixed on the first visit.
+A customer scans a QR code or taps a link, snaps a photo of the broken appliance or its model sticker, and adds one sentence. In a few seconds the AI identifies the brand, the model when it's readable, the appliance type, the likely fault, urgency, and confidence. It also writes a tech brief: which parts to bring, what to check first, and the expected repair time, so the job gets fixed on the first visit. The customer sees an estimated price range before booking. Customers can write in any language, and the diagnosis, booking screen and SMS come back in their language. Safety risks such as a gas smell, sparks or flooding trigger immediate safety steps on the customer's phone and a red priority card for the shop.
 
 The job lands on the shop's live dispatch board. The AI picks the best technician based on brand certification, skills, service area, and availability, and explains its choice in one line. The customer picks one of the offered times (or asks for a call from a person), and an SMS confirmation goes out automatically. Shop owners can steer dispatch with plain-English rules such as "Never send Sub-Zero jobs to anyone but Mike", and they apply to the next job right away.
 
