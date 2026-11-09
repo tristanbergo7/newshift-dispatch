@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { useMemo, useState } from "react";
 
 const BRANDS = ["Samsung", "LG", "Whirlpool", "GE", "Maytag", "KitchenAid", "Frigidaire", "Bosch", "Electrolux", "Sub-Zero", "Wolf", "Viking", "Thermador", "Miele"];
@@ -113,23 +115,18 @@ export default function SetupPage() {
           <p className="mt-2 text-slate-300">
             Your 14-day free trial of the {plan === "pro" ? "Pro" : "Starter"} plan has started. Customers can send photos right now.
           </p>
-          <div className="mt-6 space-y-3">
-            {[
-              ["📱 Customer link (put it on your website, texts and stickers)", customer, `/c/${slug}/upload`],
-              ["🗂️ Your dispatch board", `${origin}/c/${slug}/board`, `/c/${slug}/board`],
-              ["🔳 Your QR code to print", `${origin}/c/${slug}/qr`, `/c/${slug}/qr`],
-            ].map(([label, url, href]) => (
-              <a key={href} href={href} target="_blank" className="block rounded-xl border border-white/10 bg-[var(--navy-800)] p-4 hover:border-sky-400">
-                <div className="text-sm text-slate-400">{label}</div>
-                <div className="mt-1 break-all font-mono text-sky-300">{url}</div>
-              </a>
-            ))}
-          </div>
-          <div className="mt-6 rounded-xl bg-white/5 p-4">
-            <div className="text-sm text-slate-400">Website button (copy and paste)</div>
-            <code className="mt-2 block break-all rounded-lg bg-black/40 p-3 text-xs text-emerald-200">
-              {`<a href="${customer}" style="background:#38bdf8;color:#060d1f;padding:12px 20px;border-radius:12px;font-weight:700;text-decoration:none">📸 Get your appliance diagnosed</a>`}
-            </code>
+          <a
+            href={`/c/${slug}/board`}
+            className="mt-6 block rounded-2xl bg-sky-400 px-6 py-4 text-center text-lg font-bold text-[var(--navy-950)] shadow-lg shadow-sky-500/20"
+          >
+            Open my dashboard →
+          </a>
+          <div className="mt-4 rounded-xl border border-white/10 bg-[var(--navy-800)] p-4">
+            <div className="text-sm text-slate-400">📱 Your customer link</div>
+            <div className="mt-1 break-all font-mono text-sky-300">{customer}</div>
+            <div className="mt-2 text-xs text-slate-500">
+              Your QR code, this link and a website button are always one click away under <b>Share &amp; QR</b> on your dashboard.
+            </div>
           </div>
         </div>
       </main>
@@ -141,6 +138,9 @@ export default function SetupPage() {
       <div className="mx-auto max-w-2xl">
         <header className="flex items-center justify-between py-6">
           <div className="flex items-center gap-3">
+            <Link href="/" className="rounded-lg px-2 py-1 text-sm text-slate-400 hover:bg-white/5 hover:text-white">
+              ←
+            </Link>
             <div className="grid h-10 w-10 place-items-center rounded-lg bg-sky-400 text-xl font-black text-[var(--navy-950)]">N</div>
             <div>
               <div className="text-lg font-semibold">Set up NewShift for your shop</div>

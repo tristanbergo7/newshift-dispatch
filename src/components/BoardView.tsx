@@ -1,7 +1,10 @@
 "use client";
 
+import Link from "next/link";
+
 import { useEffect, useRef, useState } from "react";
 import type { Job, Tech } from "@/lib/types";
+import SharePanel from "./SharePanel";
 
 const URGENCY: Record<string, string> = {
   low: "bg-emerald-500/15 text-emerald-300",
@@ -21,7 +24,7 @@ function Spinner() {
 }
 
 export default function BoardView({ company }: { company: { slug: string; name: string } }) {
-  const qrHref = company.slug === "demo" ? "/qr" : `/c/${company.slug}/qr`;
+  const [sharing, setSharing] = useState(false);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [techs, setTechs] = useState<Tech[]>([]);
   const [rules, setRules] = useState("");
@@ -78,8 +81,12 @@ export default function BoardView({ company }: { company: { slug: string; name: 
 
   return (
     <main className="min-h-screen bg-[var(--navy-950)]">
+      {sharing && <SharePanel company={company} onClose={() => setSharing(false)} />}
       <header className="flex items-center justify-between border-b border-white/10 bg-[var(--navy-900)] px-6 py-4">
         <div className="flex items-center gap-3">
+          <Link href="/" className="mr-1 rounded-lg px-2 py-1 text-sm text-slate-400 hover:bg-white/5 hover:text-white" title="All shops">
+            ← Shops
+          </Link>
           <div className="grid h-10 w-10 place-items-center rounded-lg bg-sky-400 text-xl font-black text-[var(--navy-950)]">{company.name[0]?.toUpperCase()}</div>
           <div>
             <div className="text-xl font-semibold">{company.name}</div>
@@ -99,12 +106,9 @@ export default function BoardView({ company }: { company: { slug: string; name: 
             <span className={`h-2.5 w-2.5 rounded-full ${online ? "animate-pulse bg-emerald-400" : "bg-red-400"}`} />
             {online ? "Live" : "Reconnecting"}
           </span>
-          <a href="/how" target="_blank" className="rounded-lg border border-white/15 px-3 py-1.5 text-slate-300 hover:text-white">
-            How it works
-          </a>
-          <a href={qrHref} target="_blank" className="rounded-lg border border-sky-400/40 px-3 py-1.5 text-sky-300 hover:text-white">
-            Show QR
-          </a>
+          <button onClick={() => setSharing(true)} className="rounded-lg border border-sky-400/40 px-3 py-1.5 text-sky-300 hover:text-white">
+            Share &amp; QR
+          </button>
           <button onClick={reset} className="rounded-lg border border-white/10 px-3 py-1.5 text-slate-400 hover:text-white">
             Reset
           </button>
@@ -119,9 +123,9 @@ export default function BoardView({ company }: { company: { slug: string; name: 
               Waiting for the first customer photo…
               <div className="mt-2 text-sm">
                 Scan the{" "}
-                <a href={qrHref} target="_blank" className="text-sky-300 underline">
+                <button onClick={() => setSharing(true)} className="text-sky-300 underline">
                   QR code
-                </a>{" "}
+                </button>{" "}
                 to submit one.
               </div>
             </div>
